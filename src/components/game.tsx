@@ -4,6 +4,7 @@ import { Chessboard } from 'react-chessboard';
 import socket from '../routes/socket';
 import axios from 'axios';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useLocation } from 'react-router-dom';
 
 
 export default function Game({ players, room, orientation, cleanup }) {
@@ -12,7 +13,6 @@ export default function Game({ players, room, orientation, cleanup }) {
     const [over, setOver] = useState("");
     const [gameStateMessage, setGameStateMessage] = useState('');
     const { publicKey } = useWallet();
-
     const [timer1, setTimer1] = useState(10 * 60);
     const [timer2, setTimer2] = useState(10 * 60);
     const formatTime = (time) => {
@@ -73,6 +73,7 @@ export default function Game({ players, room, orientation, cleanup }) {
   
       const move = makeAMove(moveData);
       const user = orientation=="white" ? players[0] : players[1];
+      const opponent = orientation=="white" ? players[1] : players[0];
       if (over === ""){
         if (move === null) return false;
       socket.emit("move", { // <- 3 emit a move event.
@@ -94,6 +95,13 @@ export default function Game({ players, room, orientation, cleanup }) {
         makeAMove(move); //
       });
     }, [makeAMove]);
+    useEffect(() =>{
+      var user = orientation==="white" ? players[0] : players[1];
+      var opponent = orientation==="white" ? players[1] : players[0];
+      console.log(`user: ${user}`);
+      console.log(`opponent: ${opponent}`);
+      
+    }, [players])
 
     useEffect(() => {
       let interval = null;
@@ -204,7 +212,7 @@ useEffect(() => {
           <div className="w-full md:w-1/2 h-auto bg-gray-200 border-4 px-6 ">
             <div className="flex justify-between items-center py-6 w-full">
               <p className="text-2xl font-medium text-left">
-                Opponent: {players.length < 2 ? "Waiting..." : orientation==="black" ? players[1].username.slice(0,8) : players[0].username.slice(0,8)}...
+                Opponent: {players.length < 2 ? "Waiting..." : orientation=="white" ? players[1].username.slice(0,8) : players[0].username.slice(0,8)}...
               </p>
               <p className="text-2xl font-medium text-right">
                 Time: {formatTime(timer1)}
@@ -215,9 +223,6 @@ useEffect(() => {
                 position={fen}
                 onPieceDrop={onDrop}
                 boardOrientation={orientation}
-                
-                
-
               />
             </div>
             <div className="flex justify-between items-center py-8 w-full">
@@ -251,8 +256,6 @@ useEffect(() => {
               </button>
             </>
           )}
-
-
           </div>
         </div>
       </div>

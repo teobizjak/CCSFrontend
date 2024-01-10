@@ -51,7 +51,7 @@ function Play() {
     // Add your logic here
 
     console.log(`Play with ${bet} SOL`);
-    navigate("/game");
+    navigate('/game', { state: { bet: bet } });
   };
 
   return (
