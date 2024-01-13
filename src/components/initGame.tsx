@@ -6,7 +6,7 @@ import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana
 import { useLocation, useNavigate } from "react-router-dom";
 
 
-export default function InitGame({ setRoom, setOrientation, setPlayers }) {
+export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
   const [roomError, setRoomError] = useState("");
   const [txId, setTxId] = useState("");
   const [initMessage, setInitMessage] = useState("");
@@ -14,7 +14,7 @@ export default function InitGame({ setRoom, setOrientation, setPlayers }) {
   const { sendTransaction, publicKey } = useWallet();
   const navigate = useNavigate();
   const location = useLocation();
-  const bet = location.state && location.state.bet ? location.state.bet : 0.01;
+
   
 
   useEffect(() => {
@@ -32,8 +32,6 @@ export default function InitGame({ setRoom, setOrientation, setPlayers }) {
             lamports: LAMPORTS_PER_SOL * bet,
           })
         );
-    
-        if (transaction) {
           try {
             setInitMessage("Awaiting payment...");
             const hash = await sendTransaction(transaction, connection);
@@ -43,10 +41,10 @@ export default function InitGame({ setRoom, setOrientation, setPlayers }) {
             setInitMessage("Verifying payment...(this step usualy takes up to 10 seconds)");
             const signatureStatus = await connection.confirmTransaction(hash, 'confirmed');
             console.log('Signature status:', signatureStatus);
-            if (signatureStatus) {
+            if (signatureStatus){
               setInitMessage("Joining game...");
               console.log("Transaction successful, executing joinOrCreate");
-              joinOrCreate(); // Call joinOrCreate after successful transaction
+              joinOrCreate(bet); // Call joinOrCreate after successful transaction
             }else{
               navigate("/play");
             }
@@ -56,7 +54,7 @@ export default function InitGame({ setRoom, setOrientation, setPlayers }) {
             // Redirect to /play page
             navigate("/play");
           }
-        }
+        
       }
     };
     console.log("paying");
@@ -68,8 +66,9 @@ export default function InitGame({ setRoom, setOrientation, setPlayers }) {
       };
     
   }, []);
-  function joinOrCreate() {
-    socket.emit("askForRooms", (r) => {
+  function joinOrCreate(betAmount) {
+    const data = {bet: betAmount, wallet: publicKey}
+    socket.emit("askForRooms", data , (r) => {
       if (r !== "null") {
         socket.emit("joinRoom", { roomId: r, publicKey }, (r) => {
           // r is the response from the server
@@ -80,7 +79,8 @@ export default function InitGame({ setRoom, setOrientation, setPlayers }) {
           setOrientation("black"); // set orientation as black
         });
       }else{
-      socket.emit("createRoom", publicKey ,(r) => {
+      let data = {publicKey, betAmount}
+      socket.emit("createRoom", data ,(r) => {
         console.log(r);
         setRoom(r);
         setOrientation("white");

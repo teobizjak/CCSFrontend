@@ -1,8 +1,13 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 function ResultsTable({ games, handleClaim, publicKey, loadMore }) {
+  const navigate = useNavigate();
+  const analyze = (roomId) =>{
+    navigate("/analyzeGame", { state: { roomId: roomId } })
+  }
   return (
     <>
     <table className="w-full text-center border-collapse">
@@ -12,6 +17,7 @@ function ResultsTable({ games, handleClaim, publicKey, loadMore }) {
               <th className="border p-4">Your color</th>
               <th className="border p-4">Result</th>
               <th className="border p-4">Claim reward</th>
+              <th className="border p-4">Options</th>
             </tr>
           </thead>
           <tbody>
@@ -28,12 +34,12 @@ function ResultsTable({ games, handleClaim, publicKey, loadMore }) {
         }
 
         let opponent = game.white === publicKey?.toBase58() ? game.black : game.white;
-        opponent = opponent ? opponent.slice(0, 8) : "none";
+        let opponentSliced = opponent ? opponent.slice(0, 8) : "none";
         let colorTxId = game.white === publicKey?.toBase58() ? "whiteTxnId" : "blackTxnId";
 
         return (
           <tr key={index}>
-            <td className="border p-4">{opponent}...</td>
+            <td className="border p-4 cursor-pointer" onClick={() =>{navigate(`/profile/${opponent}`)}}>{opponentSliced}...</td>
             <td className="border p-4">{game.white === publicKey?.toBase58() ? "white" : "black" }</td>
             <td className="border p-4">{result}</td>
             <td className="border p-4">
@@ -48,6 +54,7 @@ function ResultsTable({ games, handleClaim, publicKey, loadMore }) {
               : <span className=" cursor-default">You lost</span>
               }
             </td>
+            <td className="border p-4"><button onClick={() => analyze(game.roomId)}>Analyze</button></td>
           </tr>
         );
       })}

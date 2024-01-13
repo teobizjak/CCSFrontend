@@ -7,6 +7,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useLocation } from 'react-router-dom';
 
 
+
+
 export default function Game({ players, room, orientation, cleanup }) {
     const chess = useMemo(() => new Chess(), []); // <- 1
     const [fen, setFen] = useState(chess.fen()); // <- 2
@@ -20,6 +22,81 @@ export default function Game({ players, room, orientation, cleanup }) {
       const seconds = time % 60;
       return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
+
+    axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION;
+    const [userEloChange, setUserEloChange] = useState({
+      whiteWin:{
+        white: "0",
+        black:"0"
+      },
+      blackWin:{
+        white: "0",
+        black:"0"
+      },
+      draw:{
+        white: "0",
+        black:"0"
+      },
+    });
+    const [user, setUser] = useState({
+      firstName: "",
+      lastName: "",
+      walletAddress: publicKey?.toBase58(),
+      elo: 300,
+      picture: "avatar"
+    });
+    const [opponent, setOpponent] = useState({
+      firstName: "",
+      lastName: "",
+      walletAddress: "waiting...",
+      elo: 300,
+      picture: "avatar"
+    });
+    useEffect(() => {
+      if (players.length > 1) {
+        axios.post(`/gameUpdateDate/${room}`)
+      }
+    }, [players]); 
+    useEffect(() => {
+      socket.on("eloChanges", (dt) => {
+        setUserEloChange(dt);
+      });
+    }, [userEloChange]); 
+    useEffect(() => {
+      console.log("players changed");
+      const fetchData = async () => {
+        try {
+          console.log("updating me");
+          
+          const response = await axios.get(`/user/${publicKey}`);
+          const userData = response.data;
+          setUser(prevUser => ({
+            ...prevUser,
+            ...userData
+          }));          
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }        
+        if (players.length > 1) {
+          try {
+            let opponentPublicKey = orientation=="white" ? players[1].username : players[0].username;
+            console.log(`updating opponent with wallet: ${opponentPublicKey}`);
+            const response = await axios.get(`/user/${opponentPublicKey}`);
+            const oppData = response.data;
+            setOpponent(prevOpp => ({
+              ...prevOpp,
+              ...oppData
+            }));      
+            console.log(response.data);
+                
+          } catch (error) {
+            console.error('Error fetching user:', error);
+          }
+        }
+      };
+  
+      fetchData();
+    }, [players]); 
     //const [whitePlayer, setWhitePlayer] = useState(players[0].username)
     //const [blackPlayer, setBlackPlayer] = useState(players[1].username)
     const makeAMove = useCallback(
@@ -35,11 +112,11 @@ export default function Game({ players, room, orientation, cleanup }) {
                 if (chess.isCheckmate()) { // if reason for game over is a checkmate
                   // Set message to checkmate. 
                   setOver(
-                    `${chess.turn() === "w" ? "Black" : "White"}`
+                    `${chess.turn() === "w" ? "Winner is black" : "Winner is white"}`
                   ); 
                   // The winner is determined by checking for which side made the last move
                 } else if (chess.isDraw()) { // if it is a draw
-                  setOver("Draw"); // set message to "Draw"
+                  setOver("It is a Draw"); // set message to "Draw"
                 } else {
                   setOver("Game over");
                 }
@@ -80,8 +157,8 @@ export default function Game({ players, room, orientation, cleanup }) {
         move,
         room,
         user,
-      }); // this event will be transmitted to the opponent via the server
-  
+        time: timer2,
+      });
       return true;
       }else{
         return false;
@@ -91,13 +168,22 @@ export default function Game({ players, room, orientation, cleanup }) {
     }
   
     useEffect(() => {
-      socket.on("move", (move) => {
-        makeAMove(move); //
+      socket.on("move", (dt) => {
+        makeAMove(dt.move);
+      });
+      socket.on("sync", (dt) => {
+        if (orientation === "white") {
+          setTimer2(Math.round(dt.whiteTimer))
+          setTimer1(Math.round(dt.blackTimer))
+        }else{
+          setTimer1(Math.round(dt.whiteTimer))
+          setTimer2(Math.round(dt.blackTimer))
+        }
       });
     }, [makeAMove]);
     useEffect(() =>{
-      var user = orientation==="white" ? players[0] : players[1];
-      var opponent = orientation==="white" ? players[1] : players[0];
+      const user = orientation==="white" ? players[0] : players[1];
+      const opponent = orientation==="white" ? players[1] : players[0];
       console.log(`user: ${user}`);
       console.log(`opponent: ${opponent}`);
       
@@ -106,7 +192,7 @@ export default function Game({ players, room, orientation, cleanup }) {
     useEffect(() => {
       let interval = null;
       console.log(`Chess turn is ${chess.turn()} orientation is ${orientation}, pl: ${players.length} over: ${over}`);
-      if (players.length > 1 && over === "" && chess.pgn() !== "") {
+      if (players.length > 1 && over === "") {
         
         if (chess.turn() !== orientation[0]) {
           interval = setInterval(() => {
@@ -119,9 +205,15 @@ export default function Game({ players, room, orientation, cleanup }) {
         }
         return () => clearInterval(interval);
       }
-    }, [chess.turn(), over]);
+    }, [chess.turn(), over, players]);
   
-        
+    useEffect(() => {
+      if (timer2 <= 0) {
+        setOver("You lost on time");
+      }else if (timer1 <= 0) {
+        socket.emit("claimWinOnTime", {room, orientation});
+      }
+    }, [timer1, timer2]);
     useEffect(() => {
       socket.on('playerDisconnected', (player) => {
         if (over === "") {
@@ -129,7 +221,13 @@ export default function Game({ players, room, orientation, cleanup }) {
           setOver(orientation.charAt(0).toUpperCase() + orientation.slice(1)); // set game over
         }
       });
-    }, []);
+    }, [over]);
+
+    useEffect(() => {
+      socket.on('winOnTime', (orientation) => {
+        setOver(orientation + " won on time");
+      });
+    }, [over]);
 
     const [playerResigned, setPlayerResigned] = useState(false);
 
@@ -201,7 +299,10 @@ useEffect(() => {
 
   function handleOfferDraw() {
     console.log("offerDraw");
-    console.log(over);
+    console.log("over", over);
+    console.log("ori", orientation);
+    console.log("opponent", opponent);
+    
     
   }
 
@@ -211,9 +312,13 @@ useEffect(() => {
         <div className="flex flex-col md:flex-row justify-between items-center h-full">
           <div className="w-full md:w-1/2 h-auto bg-gray-200 border-4 px-6 ">
             <div className="flex justify-between items-center py-6 w-full">
-              <p className="text-2xl font-medium text-left">
-                Opponent: {players.length < 2 ? "Waiting..." : orientation=="white" ? players[1].username.slice(0,8) : players[0].username.slice(0,8)}...
-              </p>
+            <p className="text-2xl font-medium text-left">
+              Opponent: {
+                opponent.firstName && opponent.lastName // Check if firstName and lastName exist
+                  ? `${opponent.firstName} ${opponent.lastName}` // If they exist, display them
+                  : opponent.walletAddress // Otherwise, display walletAddress
+              }{"(" + opponent.elo + ")"}
+            </p>
               <p className="text-2xl font-medium text-right">
                 Time: {formatTime(timer1)}
               </p>
@@ -223,12 +328,17 @@ useEffect(() => {
                 position={fen}
                 onPieceDrop={onDrop}
                 boardOrientation={orientation}
+                arePiecesDraggable={true}
               />
             </div>
             <div className="flex justify-between items-center py-8 w-full">
-              <p className="text-2xl font-medium text-left">
-              You:  {players.length < 2 ? publicKey?.toBase58().slice(0,8) : orientation==="white" ? players[0].username.slice(0,8) : players[1].username.slice(0,8)}...
-              </p>
+            <p className="text-2xl font-medium text-left">
+              User: {
+                user.firstName && user.lastName // Check if firstName and lastName exist
+                  ? `${user.firstName} ${user.lastName}` // If they exist, display them
+                  : user.walletAddress // Otherwise, display walletAddress
+              }{"(" + user.elo + ")"}{orientation === "white" ? userEloChange.whiteWin.white + " | " + userEloChange.draw.white + " | " + userEloChange.blackWin.white : userEloChange.blackWin.black + " | " + userEloChange.draw.black + " | " + userEloChange.whiteWin.black}
+            </p>
               <p className="text-2xl font-medium text-right">
                 Time: {formatTime(timer2)}
               </p>
@@ -238,7 +348,7 @@ useEffect(() => {
           {over ? (
 
             <>
-            <div>Winner is {over}</div>
+            <div>{over}</div>
             </>
           ) : (
             <>

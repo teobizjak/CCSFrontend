@@ -22,6 +22,9 @@ import Play from './routes/play';
 import Profile from './routes/profile';
 import Rewards from './routes/rewards';
 import GamePage from './routes/gamePage';
+import AnalyzeGame from "./routes/analyzeGame";
+import UserProfile from "./routes/userProfile";
+import FakeNavbar from "./components/FakeNavbar";
 
 const App = () => {
     const network = WalletAdapterNetwork.Devnet;
@@ -53,10 +56,20 @@ const App = () => {
       errorElement: <ErrorPage />,
     },
     {
+      path: "/analyzeGame",
+      element: <> <Navbar/><AnalyzeGame /></>,
+      errorElement: <ErrorPage />,
+      },
+    {
     path: "/profile",
     element: <> <Navbar/> <Profile /></>,
     errorElement: <ErrorPage />,
     },
+    {
+      path: "/profile/:publicKey",
+      element: <> <FakeNavbar/> <UserProfile /></>,
+      errorElement: <ErrorPage />,
+      },
     {
     path: "/rewards",
     element: <> <Navbar/> <Rewards /></>,

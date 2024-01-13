@@ -5,7 +5,8 @@ module.exports = function override(config, env) {
       "crypto": require.resolve("crypto-browserify"),
       "https": require.resolve("https-browserify"),
       "zlib": require.resolve("browserify-zlib"),
-      "url": require.resolve("url/")
+      "url": require.resolve("url/"),
+      
     };
     return config;
   }
