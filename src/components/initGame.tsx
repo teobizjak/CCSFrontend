@@ -33,6 +33,11 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
           })
         );
           try {
+            if (true) {
+              joinOrCreate(bet);
+            }else{
+
+            
             setInitMessage("Awaiting payment...");
             const hash = await sendTransaction(transaction, connection);
             setInitMessage("Payment success...");
@@ -48,6 +53,7 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
             }else{
               navigate("/play");
             }
+          }
             
           } catch (error) {
             console.log("Transaction failed:", error);

@@ -59,12 +59,16 @@ export default class Engine {
   }
 
   init() {
+    console.log("initing engine");
+    
     this.stockfish.postMessage("uci");
     this.stockfish.postMessage("setoption name MultiPV value 3"); // This will set MultiPV to 3
     this.stockfish.postMessage("isready");
     this.onMessage(({ uciMessage }) => {
       if (uciMessage === "readyok") {
         this.isReady = true;
+        console.log("ready");
+        
       }
     });
   }
@@ -89,6 +93,8 @@ export default class Engine {
   }
 
   terminate() {
+    console.log("terminating engine");
+    
     this.isReady = false;
     this.stockfish.postMessage("quit"); // Run this before chessboard unmounting.
   }

@@ -6,9 +6,6 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 
 const FakeNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
 
   return (

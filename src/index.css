@@ -11,3 +11,6 @@
       @apply text-micro font-sans-light py-4
     }
 }
+iframe#webpack-dev-server-client-overlay {
+  display: none;
+}

@@ -56,8 +56,8 @@ const App = () => {
       errorElement: <ErrorPage />,
     },
     {
-      path: "/analyzeGame",
-      element: <> <Navbar/><AnalyzeGame /></>,
+      path: "/analyzeGame/:gameId",
+      element: <> <FakeNavbar/><AnalyzeGame /></>,
       errorElement: <ErrorPage />,
       },
     {

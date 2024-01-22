@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 function ResultsTable({ games, handleClaim, publicKey, loadMore }) {
   const navigate = useNavigate();
   const analyze = (roomId) =>{
-    navigate("/analyzeGame", { state: { roomId: roomId } })
+    navigate(`/analyzeGame/${roomId}`)
   }
   return (
     <>

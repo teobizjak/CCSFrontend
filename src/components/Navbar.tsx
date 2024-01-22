@@ -11,7 +11,7 @@ const Navbar = () => {
   const { connected } = useWallet();
   const navigate = useNavigate();
 
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(false);
 
   // Load the connection status from localStorage on initial load
   useEffect(() => {
@@ -23,7 +23,7 @@ const Navbar = () => {
   }, []); // Empty dependency array makes this run once on initial load
 
   useEffect(() => {
-    if (!connected && !isInitialLoad) {
+    if (!connected) {
       navigate('/');
     } else if (connected && isInitialLoad) {
       setIsInitialLoad(false);

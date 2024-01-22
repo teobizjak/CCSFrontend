@@ -18,7 +18,7 @@ function UserProfile() {
   
 
   const analyze = (roomId) =>{
-    navigate("/analyzeGame", { state: { roomId: roomId } })
+    navigate(`/analyzeGame/${roomId}`)
   }
 
 

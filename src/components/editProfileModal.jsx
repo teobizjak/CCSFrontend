@@ -5,6 +5,7 @@ function EditProfileModal({ setIsEditOpen, user, setUser, axios, publicKey }) {
   const [lastName, setLastName] = useState(user.lastName);
 
   const handleSave = () => {
+    console.log("saving new data");
     const updatedUser = { ...user, publicKey, firstName, lastName };
     const token = localStorage.getItem('token'); // get the token from localStorage
     axios.put(`/user/${publicKey}`, updatedUser, {headers: {
