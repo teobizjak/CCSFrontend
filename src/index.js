@@ -25,6 +25,8 @@ import GamePage from './routes/gamePage';
 import AnalyzeGame from "./routes/analyzeGame";
 import UserProfile from "./routes/userProfile";
 import FakeNavbar from "./components/FakeNavbar";
+import Explore from "./routes/explore";
+import WatchGame from "./routes/watchGame";
 
 const App = () => {
     const network = WalletAdapterNetwork.Devnet;
@@ -46,6 +48,11 @@ const App = () => {
         errorElement: <ErrorPage />,
     },
     {
+      path: "/explore",
+        element: <> <Navbar/> <Explore /></>,
+        errorElement: <ErrorPage />,
+    },
+    {
       path: "/play",
         element: <> <Navbar/> <Play /></>,
         errorElement: <ErrorPage />,
@@ -55,6 +62,11 @@ const App = () => {
       element: <> <Navbar/> <GamePage /></>,
       errorElement: <ErrorPage />,
     },
+    {
+      path: "/watch/:roomId",
+      element: <> <Navbar/><WatchGame /></>,
+      errorElement: <ErrorPage />,
+      },
     {
       path: "/analyzeGame/:gameId",
       element: <> <FakeNavbar/><AnalyzeGame /></>,

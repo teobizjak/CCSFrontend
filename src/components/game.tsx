@@ -4,413 +4,364 @@ import { Chessboard } from 'react-chessboard'
 import socket from '../routes/socket'
 import axios from 'axios'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { useLocation } from 'react-router-dom'
 
 export default function Game({ players, room, orientation, cleanup }) {
-    const chess = useMemo(() => new Chess(), []) // <- 1
-    const [fen, setFen] = useState(chess.fen()) // <- 2
-    const [over, setOver] = useState('')
-    const [offerDraw, setOfferDraw] = useState(false)
-    const [drawOffered, setDrawOffered] = useState(false)
-    const [gameStateMessage, setGameStateMessage] = useState('')
-    const [clickedSquare, setClickedSquare] = useState(null)
+    const chess = useMemo(() => new Chess(), [])
+    const [fen, setFen] = useState(chess.fen())
+    const [gameState, setGameState] = useState({
+        over: '',
+        offerDraw: false,
+        drawOffered: false,
+        gameStateMessage: '',
+        clickedSquare: null,
+    })
     const { publicKey } = useWallet()
-    const [timer1, setTimer1] = useState(10 * 60)
-    const [timer2, setTimer2] = useState(10 * 60)
-    const [customSquareStyles, setCustomSquareStyles] = useState({});
+    const [timers, setTimers] = useState({ timer1: 10 * 60, timer2: 10 * 60 })
+    const [customSquareStyles, setCustomSquareStyles] = useState({})
     const [user, setUser] = useState({
-      firstName: '',
-      lastName: '',
-      walletAddress: publicKey?.toBase58(),
-      elo: 300,
-      picture: 'avatar',
-  })
-  const [opponent, setOpponent] = useState({
-      firstName: '',
-      lastName: '',
-      walletAddress: 'waiting...',
-      elo: 300,
-      picture: 'avatar',
-  })
-    const formatTime = (time) => {
+        firstName: '',
+        lastName: '',
+        walletAddress: publicKey?.toBase58(),
+        elo: 300,
+        picture: 'avatar',
+    })
+    const [opponent, setOpponent] = useState({
+        firstName: '',
+        lastName: '',
+        walletAddress: 'waiting...',
+        elo: 300,
+        picture: 'avatar',
+    })
+    const [userEloChange, setUserEloChange] = useState({
+        whiteWin: { white: '0', black: '0' },
+        blackWin: { white: '0', black: '0' },
+        draw: { white: '0', black: '0' },
+    })
+
+    // Utility functions
+    const formatTime = useCallback((time) => {
         const minutes = Math.floor(time / 60)
         const seconds = time % 60
         return `${minutes.toString().padStart(2, '0')}:${seconds
             .toString()
             .padStart(2, '0')}`
-    }
+    }, [])
 
+    const makeAMove = useCallback(
+        (move) => {
+            if (gameState.over === '') {
+                setGameState((prevState) => ({
+                    ...prevState,
+                    offerDraw: false,
+                    drawOffered: false,
+                }))
+                try {
+                    const result = chess.move(move)
+                    setFen(chess.fen())
+
+                    if (chess.isGameOver()) {
+                        if (chess.isCheckmate()) {
+                            setGameState((prevState) => ({
+                                ...prevState,
+                                over:
+                                    chess.turn() === 'w'
+                                        ? 'Winner is black'
+                                        : 'Winner is white',
+                            }))
+                        } else if (chess.isDraw()) {
+                            setGameState((prevState) => ({
+                                ...prevState,
+                                over: 'It is a Draw',
+                            }))
+                        } else {
+                            setGameState((prevState) => ({
+                                ...prevState,
+                                over: 'Game over',
+                            }))
+                        }
+                    }
+                    return result
+                } catch (e) {
+                    return null
+                }
+            }
+        },
+        [chess, gameState]
+    )
+
+    const handleResign = useCallback(() => {
+        const winTemp = orientation === 'white' ? 'Black' : 'White'
+        const data = {
+            message: `${orientation} has resigned.`,
+            room,
+            winner: winTemp,
+        }
+        socket.emit('resign', data)
+        setGameState((prevState) => ({ ...prevState, over: winTemp }))
+    }, [orientation, room])
+
+    const handleOfferDraw = useCallback(() => {
+        socket.emit('offerDraw', { roomId: room })
+        setGameState((prevState) => ({ ...prevState, offerDraw: true }))
+    }, [room])
+
+    const handleAcceptDraw = useCallback(() => {
+        socket.emit('acceptDraw', { roomId: room })
+    }, [room])
+
+    const handleDeclineDraw = useCallback(() => {
+        setGameState((prevState) => ({ ...prevState, drawOffered: false }))
+    }, [])
+
+    const onDrop = useCallback(
+        (sourceSquare, targetSquare) => {
+            if (chess.turn() !== orientation[0]) return false
+            if (players.length < 2 || gameState.over !== '') return false
+
+            const moveData = {
+                from: sourceSquare,
+                to: targetSquare,
+                color: chess.turn(),
+                promotion: 'q',
+            }
+
+            const move = makeAMove(moveData)
+            const user = orientation === 'white' ? players[0] : players[1]
+            if (gameState.over === '') {
+                if (move === null) return false
+                socket.emit('move', {
+                    move,
+                    room,
+                    user,
+                    time: timers.timer2,
+                })
+                return true
+            } else {
+                return false
+            }
+        },
+        [chess, orientation, players, gameState, makeAMove, timers]
+    )
+
+    const onSquareClick = useCallback(
+        (square) => {
+            if (
+                chess.turn() !== orientation[0] ||
+                players.length < 2 ||
+                gameState.over !== ''
+            ) {
+                return false
+            }
+
+            const piece = chess.get(square)
+            if (piece && piece.color === chess.turn()) {
+                setGameState((prevState) => ({
+                    ...prevState,
+                    clickedSquare: square,
+                }))
+                const moves = chess.moves({ square: square, verbose: true })
+                const highlightStyles = moves.reduce((styles, move) => {
+                    return {
+                        ...styles,
+                        [move.to]: { background: 'rgba(255, 255, 0, 0.4)' },
+                    }
+                }, {})
+                setCustomSquareStyles(highlightStyles)
+            } else {
+                try {
+                    const moveData = {
+                        from: gameState.clickedSquare,
+                        to: square,
+                        color: chess.turn(),
+                        promotion: 'q',
+                    }
+                    const move = makeAMove(moveData)
+                    const user =
+                        orientation === 'white' ? players[0] : players[1]
+                    setGameState((prevState) => ({
+                        ...prevState,
+                        clickedSquare: null,
+                    }))
+                    setCustomSquareStyles({})
+                    if (move === null) return false
+                    socket.emit('move', {
+                        move,
+                        room,
+                        user,
+                        time: timers.timer2,
+                    })
+                } catch (error) {
+                    console.error(error)
+                }
+            }
+        },
+        [
+            chess,
+            orientation,
+            players,
+            gameState,
+            makeAMove,
+            setCustomSquareStyles,
+        ]
+    )
+
+    // Axios default settings
     axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION
 
-    const [userEloChange, setUserEloChange] = useState({
-        whiteWin: {
-            white: '0',
-            black: '0',
-        },
-        blackWin: {
-            white: '0',
-            black: '0',
-        },
-        draw: {
-            white: '0',
-            black: '0',
-        },
-    })
-
+    // UseEffects for socket and game logic
     useEffect(() => {
-        if (players.length > 1) {
-            axios.post(`/gameUpdateDate/${room}`)
-        }
-    }, [players])
-
-    useEffect(() => {
-        socket.on('eloChanges', (dt) => {
-            setUserEloChange(dt)
-        })
-    }, [userEloChange])
-
-    useEffect(() => {
-        console.log('players changed', JSON.stringify(players))
-        const fetchData = async () => {
+        const fetchUserData = async () => {
             try {
-                console.log('updating me')
-
                 const response = await axios.get(`/user/${publicKey}`)
                 const userData = response.data
-                setUser((prevUser) => ({
-                    ...prevUser,
-                    ...userData,
-                }))
+                setUser(userData)
             } catch (error) {
                 console.error('Error fetching user:', error)
             }
+        }
+
+        const fetchOpponentData = async () => {
             if (players.length > 1) {
+                const opponentPublicKey =
+                    orientation === 'white'
+                        ? players[1].username
+                        : players[0].username
                 try {
-                    let opponentPublicKey =
-                        orientation == 'white'
-                            ? players[1].username
-                            : players[0].username
-                    console.log(
-                        `updating opponent with wallet: ${opponentPublicKey}`
-                    )
                     const response = await axios.get(
                         `/user/${opponentPublicKey}`
                     )
                     const oppData = response.data
-                    setOpponent((prevOpp) => ({
-                        ...prevOpp,
-                        ...oppData,
-                    }))
-                    console.log("setting opponent to", response.data);
-                    console.log(opponent);
-                    
-                    
-                    console.log(response.data)
+                    setOpponent(oppData)
                 } catch (error) {
-                    console.error('Error fetching user:', error)
+                    console.error('Error fetching opponent:', error)
                 }
             }
         }
 
-        fetchData()
-    }, [players])
+        fetchUserData()
+        fetchOpponentData()
+    }, [players, publicKey, orientation])
 
-    useEffect(() =>{
-      console.log("opponent: ", JSON.stringify(opponent));
-      
-    }, [opponent])
-
-    const makeAMove = useCallback(
-        (move) => {
-            if (over === '') {
-                setDrawOffered(false)
-                setOfferDraw(false)
-                try {
-                    const result = chess.move(move) // update Chess instance
-                    setFen(chess.fen()) // update fen state to trigger a re-render
-
-                    console.log(
-                        'over, checkmate',
-                        chess.isGameOver(),
-                        chess.isCheckmate()
-                    )
-
-                    if (chess.isGameOver()) {
-                        // check if move led to "game over"
-                        if (chess.isCheckmate()) {
-                            // if reason for game over is a checkmate
-                            // Set message to checkmate.
-                            setOver(
-                                `${
-                                    chess.turn() === 'w'
-                                        ? 'Winner is black'
-                                        : 'Winner is white'
-                                }`
-                            )
-                            // The winner is determined by checking for which side made the last move
-                        } else if (chess.isDraw()) {
-                            // if it is a draw
-                            setOver('It is a Draw') // set message to "Draw"
-                        } else {
-                            setOver('Game over')
-                        }
-                    }
-                    console.log(`resultOfMove ${result}`)
-
-                    return result
-                } catch (e) {
-                    return null
-                } // null if the move was illegal, the move object if the move was legal
-            }
-        },
-        [chess]
-    )
-
-    // onDrop function
-    function onDrop(sourceSquare, targetSquare) {
-        // orientation is either 'white' or 'black'. game.turn() returns 'w' or 'b'
-        if (chess.turn() !== orientation[0]) return false // <- 1 prohibit player from moving piece of other player
-
-        if (players.length < 2 || over !== '') return false // <- 2 disallow a move if the opponent has not joined
-
-        const moveData = {
-            from: sourceSquare,
-            to: targetSquare,
-            color: chess.turn(),
-            promotion: 'q', // promote to queen where possible
-        }
-
-        const move = makeAMove(moveData)
-        const user = orientation == 'white' ? players[0] : players[1]
-        if (over === '') {
-            if (move === null) return false
-            socket.emit('move', {
-                // <- 3 emit a move event.
-                move,
-                room,
-                user,
-                time: timer2,
-            })
-            return true
-        } else {
-            return false
-        }
-        // illegal move
-    }
-
+    // Socket event listeners and game logic
     useEffect(() => {
+        // Listener for 'move' event from socket
         socket.on('move', (dt) => {
             makeAMove(dt.move)
         })
+
+        // Listener for 'sync' event from socket
         socket.on('sync', (dt) => {
             if (orientation === 'white') {
-                setTimer2(Math.round(dt.whiteTimer))
-                setTimer1(Math.round(dt.blackTimer))
+                setTimers({
+                    timer1: Math.round(dt.blackTimer),
+                    timer2: Math.round(dt.whiteTimer),
+                })
             } else {
-                setTimer1(Math.round(dt.whiteTimer))
-                setTimer2(Math.round(dt.blackTimer))
+                setTimers({
+                    timer1: Math.round(dt.whiteTimer),
+                    timer2: Math.round(dt.blackTimer),
+                })
             }
         })
-    }, [makeAMove])
-    
-    useEffect(() => {
-        let interval = null
-        console.log(
-            `Chess turn is ${chess.turn()} orientation is ${orientation}, pl: ${
-                players.length
-            } over: ${over}`
-        )
-        if (players.length > 1 && over === '') {
-            if (chess.turn() !== orientation[0]) {
-                interval = setInterval(() => {
-                    setTimer1((timer1) => timer1 - 1)
-                }, 1000)
-            } else if (chess.turn() === orientation[0]) {
-                interval = setInterval(() => {
-                    setTimer2((timer2) => timer2 - 1)
-                }, 1000)
-            }
-            return () => clearInterval(interval)
-        }
-    }, [chess.turn(), over, players])
 
-    useEffect(() => {
-        if (timer2 <= 0) {
-            setOver('You lost on time')
-        } else if (timer1 <= 0) {
-            socket.emit('claimWinOnTime', { room, orientation })
-        }
-    }, [timer1, timer2])
+        // Listener for 'eloChanges' event from socket
+        socket.on('eloChanges', (dt) => {
+            setUserEloChange(dt)
+        })
 
-    useEffect(() => {
-        socket.on('playerDisconnected', (player) => {
-            if (over === '') {
-                console.log(`Opponent disconnected, winner ${orientation}`)
-                setOver(
-                    orientation.charAt(0).toUpperCase() + orientation.slice(1)
-                ) // set game over
+        // Listener for 'playerDisconnected' event
+        socket.on('playerDisconnected', () => {
+            if (gameState.over === '') {
+                setGameState((prevState) => ({
+                    ...prevState,
+                    over: 'Opponent Disconnected',
+                }))
             }
         })
-    }, [over])
 
-
-    useEffect(() => {
-        socket.on('winOnTime', (orientation) => {
-            setOver(orientation + ' won on time')
+        // Listener for 'winOnTime' event
+        socket.on('winOnTime', (winningOrientation) => {
+            setGameState((prevState) => ({
+                ...prevState,
+                over: `${winningOrientation} won on time`,
+            }))
         })
-    }, [over])
 
-    const [playerResigned, setPlayerResigned] = useState(false)
+        // Listener for 'playerResigned' event
+        socket.on('playerResigned', (data) => {
+            setGameState((prevState) => ({
+                ...prevState,
+                over: `${data.winner} won by resignation`,
+                gameStateMessage: data.message,
+            }))
+        })
 
-    useEffect(() => {
-        // Listen for 'playerResigned' event
+        // Listener for 'drawAccepted' and 'drawOffered' events
         socket.on('drawAccepted', () => {
-            setOver('Draw')
+            setGameState((prevState) => ({ ...prevState, over: 'Draw' }))
         })
         socket.on('drawOffered', () => {
-            setDrawOffered(true)
-        })
-        socket.on('playerResigned', (data) => {
-            if (!playerResigned) {
-                console.log(JSON.stringify(data))
-
-                console.log(`Opponent resigned. Winner is ${data.winner}`)
-                setOver(data.winner)
-                setGameStateMessage(data.message)
-                setPlayerResigned(true)
-            }
+            setGameState((prevState) => ({ ...prevState, drawOffered: true }))
         })
 
-        // Cleanup listener on unmount
-        return () => {
-            socket.off('playerResigned')
-        }
-    }, [])
-
-    useEffect(() => {
+        // Listener for 'closeRoom' event
         socket.on('closeRoom', ({ roomId }) => {
-            console.log('closeRoom', roomId, room)
             if (roomId === room) {
                 cleanup()
             }
         })
-    }, [room, cleanup])
 
+        // Cleanup socket listeners on unmount
+        return () => {
+            socket.off('move')
+            socket.off('sync')
+            socket.off('eloChanges')
+            socket.off('playerDisconnected')
+            socket.off('winOnTime')
+            socket.off('playerResigned')
+            socket.off('drawAccepted')
+            socket.off('drawOffered')
+            socket.off('closeRoom')
+        }
+    }, [
+        makeAMove,
+        orientation,
+        room,
+        cleanup,
+        gameState.over,
+        publicKey,
+        players,
+    ])
+
+    // Timer logic
     useEffect(() => {
-        if (
-            (over === 'Draw' && orientation === 'white') ||
-            over == orientation.charAt(0).toUpperCase() + orientation.slice(1)
-        ) {
-            // Prepare your data
-            const data = {
-                whiteWallet: players[0].username, // replace with actual value
-                blackWallet: players[1].username, // replace with actual value
-                winner: over,
+        let interval
+        if (players.length === 2 && gameState.over === '') {
+            interval = setInterval(() => {
+                setTimers((prevTimers) => {
+                    const newTimers = { ...prevTimers }
+
+                    // Decrement timer1 if it's the opponent's turn, else decrement timer2
+                    if (
+                        (chess.turn() === 'w' && orientation !== 'white') ||
+                        (chess.turn() === 'b' && orientation !== 'black')
+                    ) {
+                        newTimers.timer1--
+                    } else {
+                        newTimers.timer2--
+                    }
+
+                    return newTimers
+                })
+            }, 1000)
+        }
+
+        return () => {
+            if (interval) {
+                clearInterval(interval)
             }
-
-            // Make a POST request
-            axios
-                .post('http://localhost:8080/postGameData', data) // replace 'your-endpoint' with actual endpoint
-                .then((response) => {
-                    console.log('Success:', response.data)
-                })
-                .catch((error) => {
-                    console.error('Error:', error)
-                })
         }
-    }, [over])
-
-    useEffect(() => {
-        socket.on('updateFen', (data) => {
-            setFen(data.fen)
-            chess.loadPgn(data.pgn)
-        })
-    }, [fen])
-
-
-    function handleResign() {
-        const winTemp = orientation === 'white' ? 'Black' : 'White'
-        const data = {
-            message: `${orientation} has resigned.`,
-            room: room, // replace with your room ID
-            winner: winTemp, // replace with the winner's ID
-        }
-        // Emit 'resign' event to server
-        socket.emit('resign', data)
-        console.log('resign')
-        setOver(orientation === 'white' ? 'Black' : 'White')
-    }
-
-    function handleOfferDraw() {
-        console.log('offerDraw')
-        socket.emit('offerDraw', {
-            roomId: room,
-        })
-        setOfferDraw(true)
-        console.log("opponent", JSON.stringify(opponent))
-    }
-
-    function handleAcceptDraw() {
-        console.log('accept draw')
-        socket.emit('acceptDraw', {
-            roomId: room,
-        })
-    }
-
-    function handleDeclineDraw() {
-        console.log('decline draw')
-        setDrawOffered(false)
-    }
-
-        
-    function onSquareClick(square) {
-      console.log('square clicked', square);
-  
-      if (chess.turn() !== orientation[0] || players.length < 2 || over !== '') {
-          return false; // Prohibit if it's not the player's turn, or the game is over, or the opponent has not joined
-      }
-  
-      const piece = chess.get(square);
-      if (piece && piece.color === chess.turn()) {
-          // Highlight moves when a piece is clicked
-          setClickedSquare(square);
-          const moves = chess.moves({ square: square, verbose: true });
-          const highlightStyles = moves.reduce((styles, move) => {
-              return {
-                  ...styles,
-                  [move.to]: { background: "rgba(255, 255, 0, 0.4)" } // Highlight available moves
-              };
-          }, {});
-          setCustomSquareStyles(highlightStyles);
-          console.log('Available moves from ' + square + ': ', moves);
-      } else {
-          // Attempt to make a move and reset clickedSquare
-          try {
-              const moveData = {
-                  from: clickedSquare,
-                  to: square,
-                  color: chess.turn(),
-                  promotion: 'q', // Promote to queen where possible
-              };
-              const move = makeAMove(moveData);
-              const user = orientation === 'white' ? players[0] : players[1];
-              setClickedSquare(null);
-              setCustomSquareStyles({}); // Clear highlighted squares
-              if (move === null) return false;
-              socket.emit('move', {
-                  move,
-                  room,
-                  user,
-                  time: timer2,
-              });
-          } catch (error) {
-              console.log(error);
-          }
-      }
-  }
-  
-  
-  
+    }, [players, chess, gameState.over, orientation])
 
     return (
         <div className="h-screen w-full bg-gray-900">
@@ -428,7 +379,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                                 {'(' + opponent.elo + ')'}
                             </p>
                             <p className="text-right text-2xl font-medium">
-                                Time: {formatTime(timer1)}
+                                Time: {formatTime(timers.timer1)}
                             </p>
                         </div>
                         <div>
@@ -463,14 +414,14 @@ export default function Game({ players, room, orientation, cleanup }) {
                                       userEloChange.whiteWin.black}
                             </p>
                             <p className="text-right text-2xl font-medium">
-                                Time: {formatTime(timer2)}
+                                Time: {formatTime(timers.timer2)}
                             </p>
                         </div>
                     </div>
                     <div className="flex h-96 w-full flex-col items-center justify-center md:w-1/2">
-                        {over ? (
+                        {gameState.over ? (
                             <>
-                                <div>{over}</div>
+                                <div>{gameState.over}</div>
                             </>
                         ) : (
                             <>
@@ -480,7 +431,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                                 >
                                     Resign
                                 </button>
-                                {drawOffered ? (
+                                {gameState.drawOffered ? (
                                     <>
                                         <button onClick={handleAcceptDraw}>
                                             Accept draw
@@ -489,7 +440,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                                             Decline draw
                                         </button>
                                     </>
-                                ) : offerDraw ? (
+                                ) : gameState.offerDraw ? (
                                     <span className="rounded-lg bg-yellow-500 px-12 py-4 text-2xl font-bold text-white">
                                         Draw offered
                                     </span>
