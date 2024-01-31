@@ -59,44 +59,47 @@ const FinishedGames = () => {
 
   return (
     <>
+    <div className='p-4'>
       <h2 className="text-xl font-semibold mb-4 text-purple-400">Recently Finished Games</h2>
-      {games.length < 1 ? (
-        <p className="text-white">No finished games.</p>
-      ) : (
-        <Slider {...settings}>
-          {games.map((game) => (
-            <div key={game.roomId} className="p-4">
-              <div className="bg-gray-700 shadow rounded-lg p-4 hover:bg-gray-600 transition duration-500 ease-in-out flex flex-col items-center">
-                <div className="text-purple-500 font-semibold mb-2">
-                  {game.winner === "draw" ? "draw" : `${game.winner.slice(0, 6)} wins`}
-                </div>
-                <div className="font-bold text-white w-full text-center">
-                  <div
-                    className="cursor-pointer hover:text-purple-400"
-                    onClick={() => navigateToProfile(game.white)}
-                  >
-                    <div className=' inline-block w-3 h-3 bg-white mr-1'></div>
-                    {game.white.slice(0, 6)}... ({game.whiteElo})
+            {games.length < 1 ? (
+              <p className="text-white">No finished games.</p>
+            ) : (
+              <Slider {...settings}>
+                {games.map((game) => (
+                  <div key={game.roomId} className="p-4">
+                    <div className="bg-gray-700 shadow rounded-lg p-4 hover:bg-gray-600 transition duration-500 ease-in-out flex flex-col items-center">
+                      <div className="text-purple-500 font-semibold mb-2">
+                        {game.winner === "draw" ? "draw" : `${game.winner.slice(0, 6)} wins`}
+                      </div>
+                      <div className="font-bold text-white w-full text-center">
+                        <div
+                          className="cursor-pointer hover:text-purple-400"
+                          onClick={() => navigateToProfile(game.white)}
+                        >
+                          <div className=' inline-block w-3 h-3 bg-white mr-1'></div>
+                          {game.white.slice(0, 6)}... ({game.whiteElo})
+                        </div>
+                        <div>
+                          vs
+                        </div>
+                        <div
+                          className="cursor-pointer hover:text-purple-400"
+                          onClick={() => navigateToProfile(game.black)}
+                        >
+                          <div className=' inline-block w-3 h-3 bg-black mr-1'></div>
+                          {game.black.slice(0, 6)}... ({game.blackElo})
+                        </div>
+                      </div>
+                      <div onClick={() => analyzeGame(game.roomId)} className="cursor-pointer mt-2 w-full">
+                        <Chessboard arePiecesDraggable={false} position={game.fen}  />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    vs
-                  </div>
-                  <div
-                    className="cursor-pointer hover:text-purple-400"
-                    onClick={() => navigateToProfile(game.black)}
-                  >
-                    <div className=' inline-block w-3 h-3 bg-black mr-1'></div>
-                    {game.black.slice(0, 6)}... ({game.blackElo})
-                  </div>
-                </div>
-                <div onClick={() => analyzeGame(game.roomId)} className="cursor-pointer mt-2 w-full">
-                  <Chessboard arePiecesDraggable={false} position={game.fen}  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </Slider>
-      )}
+                ))}
+              </Slider>
+            )}
+    </div>
+      
     </>
 
   );

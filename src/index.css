@@ -30,6 +30,21 @@ iframe#webpack-dev-server-client-overlay {
   }
 }
 
+@keyframes slideIn {
+  0% {
+      opacity: 0;
+      transform: translateY(-20px);
+  }
+  100% {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+.option-animation {
+  opacity: 0;
+  animation: slideIn 0.3s ease forwards;
+}
 .animate-fadeIn {
   opacity: 0; /* Start with elements invisible */
   animation: fadeIn 0.5s ease-out forwards;

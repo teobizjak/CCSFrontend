@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DisplaySearchedUserComponent from './displaySearchedUser';
+import Heading from './heading';
 
 const SearchComponent = () => {
   const [query, setQuery] = useState('');
@@ -29,7 +30,7 @@ const SearchComponent = () => {
 
   return (
     <div className='container mx-auto p-4'>
-      <h2 className="mb-2 text-xl font-semibold text-purple-400">Search user</h2>
+      <Heading>Search User</Heading>
       <input
         type="text"
         value={query}

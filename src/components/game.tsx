@@ -4,10 +4,35 @@ import { Chessboard } from 'react-chessboard'
 import socket from '../routes/socket'
 import axios from 'axios'
 import { useWallet } from '@solana/wallet-adapter-react'
+import GameUserData from './gameUserData'
+import { getUserData } from '../functions/getUser'
+import GameHistoryBox from './gameHistoryBox'
+
+
 
 export default function Game({ players, room, orientation, cleanup }) {
+    interface UserData {
+        createdAt?: string;
+        drawn?: number;
+        elo?: number;
+        eloK?: number;
+        firstName?: string;
+        lastName?: string;
+        lost?: number;
+        paid?: number;
+        siteTitle?: string;
+        title?: string;
+        picture?: string;
+        reported?: number;
+        updatedAt?: string;
+        walletAddress?: string;
+        winnings?: number;
+        won?: number;
+      }
     const chess = useMemo(() => new Chess(), [])
     const [fen, setFen] = useState(chess.fen())
+    const [isPlayback, setIsPlayback] = useState(false);
+    const [playbackIndex, setPlaybackIndex] = useState(0);
     const [gameState, setGameState] = useState({
         over: '',
         offerDraw: false,
@@ -18,25 +43,23 @@ export default function Game({ players, room, orientation, cleanup }) {
     const { publicKey } = useWallet()
     const [timers, setTimers] = useState({ timer1: 10 * 60, timer2: 10 * 60 })
     const [customSquareStyles, setCustomSquareStyles] = useState({})
-    const [user, setUser] = useState({
-        firstName: '',
-        lastName: '',
+    const [fenHistory, setFenHistory] = useState([]);
+    const [user, setUser] = useState<UserData>({
         walletAddress: publicKey?.toBase58(),
         elo: 300,
         picture: 'avatar',
     })
-    const [opponent, setOpponent] = useState({
-        firstName: '',
-        lastName: '',
-        walletAddress: 'waiting...',
+    const [opponent, setOpponent] = useState<UserData>({
+        walletAddress: 'waiting',
         elo: 300,
-        picture: 'avatar',
+        picture: 'unknown',
     })
     const [userEloChange, setUserEloChange] = useState({
         whiteWin: { white: '0', black: '0' },
         blackWin: { white: '0', black: '0' },
         draw: { white: '0', black: '0' },
     })
+    const [userEloChangeWritable, setUserEloChangeWritable] = useState("0|0|0")
 
     // Utility functions
     const formatTime = useCallback((time) => {
@@ -49,6 +72,12 @@ export default function Game({ players, room, orientation, cleanup }) {
 
     const makeAMove = useCallback(
         (move) => {
+            if (isPlayback === true) {
+                setIsPlayback(false);
+                setPlaybackIndex(fenHistory.length);
+                return;
+            }
+            setCustomSquareStyles({})
             if (gameState.over === '') {
                 setGameState((prevState) => ({
                     ...prevState,
@@ -58,7 +87,9 @@ export default function Game({ players, room, orientation, cleanup }) {
                 try {
                     const result = chess.move(move)
                     setFen(chess.fen())
-
+                    if (result) {
+                        setPlaybackIndex(playbackIndex + 1);
+                    }
                     if (chess.isGameOver()) {
                         if (chess.isCheckmate()) {
                             setGameState((prevState) => ({
@@ -112,6 +143,38 @@ export default function Game({ players, room, orientation, cleanup }) {
     const handleDeclineDraw = useCallback(() => {
         setGameState((prevState) => ({ ...prevState, drawOffered: false }))
     }, [])
+
+    const handleLeftArrow = () => {
+        if (playbackIndex > 0) {
+            setIsPlayback(true);
+            setPlaybackIndex(prevIndex => prevIndex - 1);
+        }
+        console.log(playbackIndex);
+        
+    };
+    
+    const handleRightArrow = () => {
+        if (playbackIndex < fenHistory.length - 1) {
+            setIsPlayback(true);
+            setPlaybackIndex(prevIndex => prevIndex + 1);
+        } else {
+            setIsPlayback(false);
+        }
+        console.log(playbackIndex);
+    };
+
+    const handleKeyDown = (event) => {
+        switch (event.key) {
+          case 'ArrowLeft':
+            handleLeftArrow();
+            break;
+          case 'ArrowRight':
+            handleRightArrow();
+            break;
+          default:
+            break;
+        }
+      };
 
     const onDrop = useCallback(
         (sourceSquare, targetSquare) => {
@@ -212,9 +275,10 @@ export default function Game({ players, room, orientation, cleanup }) {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(`/user/${publicKey}`)
-                const userData = response.data
-                setUser(userData)
+                const data = await getUserData(publicKey); // Passing userId as a parameter
+                console.log("myData", data);
+                
+                setUser(data);
             } catch (error) {
                 console.error('Error fetching user:', error)
             }
@@ -222,19 +286,11 @@ export default function Game({ players, room, orientation, cleanup }) {
 
         const fetchOpponentData = async () => {
             if (players.length > 1) {
-                const opponentPublicKey =
-                    orientation === 'white'
-                        ? players[1].username
-                        : players[0].username
-                try {
-                    const response = await axios.get(
-                        `/user/${opponentPublicKey}`
-                    )
-                    const oppData = response.data
-                    setOpponent(oppData)
-                } catch (error) {
-                    console.error('Error fetching opponent:', error)
-                }
+                const opponentPublicKey = orientation === 'white' ? players[1].username : players[0].username
+                const data = await getUserData(opponentPublicKey); // Passing userId as a parameter
+                console.log("opponentData", data);
+                
+                setOpponent(data);
             }
         }
 
@@ -266,7 +322,25 @@ export default function Game({ players, room, orientation, cleanup }) {
 
         // Listener for 'eloChanges' event from socket
         socket.on('eloChanges', (dt) => {
+            console.log("eloChanges", dt);
+            
+            let str = "";
             setUserEloChange(dt)
+            if (orientation === "white") {
+                str += " + " + dt.whiteWin.white + " | "; if (dt.draw.white > 0) {
+                    str += " + " + dt.draw.white
+                }else {
+                    str += dt.draw.white
+                } str+= " | " + dt.blackWin.white;
+            }else{
+                str += dt.blackWin.black + " | ";if (dt.draw.black > 0) {
+                    str += "+" + dt.draw.black
+                }else {
+                    str += dt.draw.black
+                } str+= " | " + dt.whiteWin.black;
+            }
+            console.log("eloChangesWritten", str);
+            setUserEloChangeWritable(str);
         })
 
         // Listener for 'playerDisconnected' event
@@ -310,9 +384,12 @@ export default function Game({ players, room, orientation, cleanup }) {
                 cleanup()
             }
         })
+        window.addEventListener('keydown', handleKeyDown);
+
 
         // Cleanup socket listeners on unmount
         return () => {
+            window.removeEventListener('keydown', handleKeyDown);
             socket.off('move')
             socket.off('sync')
             socket.off('eloChanges')
@@ -364,99 +441,49 @@ export default function Game({ players, room, orientation, cleanup }) {
     }, [players, chess, gameState.over, orientation])
 
     return (
-        <div className="h-screen w-full bg-gray-900">
-            <div className="mx-auto h-full max-w-7xl bg-purple-100 px-4 sm:px-6 lg:px-8">
-                <div className="flex h-full flex-col items-center justify-between md:flex-row">
-                    <div className="h-auto w-full border-4 bg-gray-200 px-6 md:w-1/2 ">
-                        <div className="flex w-full items-center justify-between py-6">
-                            <p className="text-left text-2xl font-medium">
-                                Opponent:{' '}
-                                {
-                                    opponent.firstName && opponent.lastName // Check if firstName and lastName exist
-                                        ? `${opponent.firstName} ${opponent.lastName}` // If they exist, display them
-                                        : opponent.walletAddress // Otherwise, display walletAddress
-                                }
-                                {'(' + opponent.elo + ')'}
-                            </p>
-                            <p className="text-right text-2xl font-medium">
-                                Time: {formatTime(timers.timer1)}
-                            </p>
-                        </div>
-                        <div>
-                            <Chessboard
-                                position={fen}
-                                onPieceDrop={onDrop}
-                                boardOrientation={orientation}
-                                arePiecesDraggable={true}
-                                onSquareClick={onSquareClick}
-                                customSquareStyles={customSquareStyles}
-                            />
-                        </div>
-                        <div className="flex w-full items-center justify-between py-8">
-                            <p className="text-left text-2xl font-medium">
-                                User:{' '}
-                                {
-                                    user.firstName && user.lastName // Check if firstName and lastName exist
-                                        ? `${user.firstName} ${user.lastName}` // If they exist, display them
-                                        : user.walletAddress // Otherwise, display walletAddress
-                                }
-                                {'(' + user.elo + ')'}
-                                {orientation === 'white'
-                                    ? userEloChange.whiteWin.white +
-                                      ' | ' +
-                                      userEloChange.draw.white +
-                                      ' | ' +
-                                      userEloChange.blackWin.white
-                                    : userEloChange.blackWin.black +
-                                      ' | ' +
-                                      userEloChange.draw.black +
-                                      ' | ' +
-                                      userEloChange.whiteWin.black}
-                            </p>
-                            <p className="text-right text-2xl font-medium">
-                                Time: {formatTime(timers.timer2)}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex h-96 w-full flex-col items-center justify-center md:w-1/2">
-                        {gameState.over ? (
-                            <>
-                                <div>{gameState.over}</div>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    className="rounded-lg bg-red-500 px-12 py-4 text-2xl font-bold text-white"
-                                    onClick={handleResign}
-                                >
-                                    Resign
-                                </button>
-                                {gameState.drawOffered ? (
-                                    <>
-                                        <button onClick={handleAcceptDraw}>
-                                            Accept draw
-                                        </button>
-                                        <button onClick={handleDeclineDraw}>
-                                            Decline draw
-                                        </button>
-                                    </>
-                                ) : gameState.offerDraw ? (
-                                    <span className="rounded-lg bg-yellow-500 px-12 py-4 text-2xl font-bold text-white">
-                                        Draw offered
-                                    </span>
-                                ) : (
-                                    <button
-                                        className="rounded-lg bg-yellow-500 px-12 py-4 text-2xl font-bold text-white"
-                                        onClick={handleOfferDraw}
-                                    >
-                                        Offer Draw
-                                    </button>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
+  <div className="h-screen w-full bg-gray-900">
+      <div className="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-full flex-col items-center justify-between md:flex-row">
+              <div className="h-auto max-w-[80vh] rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-6 text-white shadow-xl">
+                  <div>
+                      <div className="flex w-full items-center justify-between py-4">
+                        <GameUserData user={opponent} timer={timers.timer1} name={"Opponent"}/>
+                      </div>
+                      <div>
+                        <Chessboard
+                            position={isPlayback === true ? fenHistory[playbackIndex] :fen}
+                            onPieceDrop={onDrop}
+                            boardOrientation={orientation}
+                            arePiecesDraggable={true}
+                            onSquareClick={onSquareClick}
+                            customSquareStyles={customSquareStyles}
+                            customArrowColor='#6B21A8'
+                        />
+                      </div>
+                      <div className="flex w-full items-center justify-between py-4">
+                        <GameUserData user={user} timer={timers.timer2} name={"You"} orientation={orientation}/>
+                      </div>
+                  </div>
+              </div>
+              <div className="flex flex-col w-full md:max-w-[calc(100%-80vh)] rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-6 py-4 overflow-hidden">
+                  <div className="flex-grow overflow-auto">
+                      <GameHistoryBox chess={chess} fenHistory={fenHistory} setIsPlayback={setIsPlayback} setPlaybackIndex={setPlaybackIndex}/>
+                  </div>
+                  <div className="flex justify-between mt-4">
+                      <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                          Resign
+                      </button>
+                      <button className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                          Offer Draw
+                      </button>
+                      <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                          Report Cheating
+                      </button>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+)
+
 }

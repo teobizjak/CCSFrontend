@@ -59,7 +59,7 @@ const App = () => {
     },
     {
       path: "/game/",
-      element: <> <Navbar/> <GamePage /></>,
+      element: <> <GamePage /></>,
       errorElement: <ErrorPage />,
     },
     {

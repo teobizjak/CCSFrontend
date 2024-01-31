@@ -4,10 +4,31 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import socket from "./socket";
 import ResultsTable from "../components/resultsTable";
+import { getUserData } from "../functions/getUser";
 
 
 
 function Home() {
+
+  interface UserData {
+    createdAt?: string;
+    drawn?: number;
+    elo?: number;
+    eloK?: number;
+    firstName?: string;
+    lastName?: string;
+    lost?: number;
+    paid?: number;
+    siteTitle?: string;
+    title?: string;
+    picture?: string;
+    reported?: number;
+    updatedAt?: string;
+    walletAddress?: string;
+    winnings?: number;
+    won?: number;
+  }
+
   const navigate = useNavigate();
   const { publicKey } = useWallet();
   axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION;
@@ -17,11 +38,12 @@ function Home() {
   const [streak, setStreak] = useState("");
   const [limit, setLimit] = useState(5);
   const [games, setGames] = useState([]);
+  const [userData, setUserData] = useState<UserData>({});
   
   function loadMore(){
     setLimit(limit + 5)
   }
-
+  
   const fetchData = () => {
     console.log(`getting games from ${publicKey}`);
     
@@ -32,8 +54,11 @@ function Home() {
     })
     .then(response => {
       setGames([]);
-      let sortedGames = [...response.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setGames(response.data);
+      let sortedGames = [...response.data.games].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setGames(response.data.games);
+      if (response.data.games.length < 10) {
+        
+      }
   
       sortedGames.map((game, index) => {
         let result;
@@ -61,7 +86,14 @@ function Home() {
   
   
   useEffect(() => {
+    async function fetchUserData() {
+      const data = await getUserData(publicKey?.toBase58()); // Passing userId as a parameter
+      console.log("userData", data);
+      
+      setUserData(data);
+    }
     if (publicKey) {
+      fetchUserData()
       socket.emit("updateUserToken", publicKey, (r) => {
         console.log(r);
         localStorage.setItem('token', r);
@@ -72,10 +104,35 @@ function Home() {
       });
     }
   }, []);
+  useEffect(() => {
+    async function checkSiteTitle() {
+      
+    
+    const { drawn, won, lost, siteTitle } = userData;
+    if (publicKey && won && drawn && lost && siteTitle === undefined) {
+      const totalGames = drawn + won + lost;
+      if (totalGames <= 10 ) {
+        // Execute something here if total of drawn, won, and lost is not more than 10
+        const response = await axios.put(`/updateSiteTitle/${publicKey?.toBase58()}`);
+    console.log('Success:', response.data);
+        // Place your code for the action you want to execute here
+      } else {
+        console.log("Total games are more than 10, not executing the action.");
+      }
+    }else if (publicKey && siteTitle === undefined) {
+      const response = await axios.put(`/updateSiteTitle/${publicKey?.toBase58()}`);
+    }
+  }
+  checkSiteTitle();
+  
+
+  
+  }, [userData]);
   
   
   useEffect(() => {
     fetchData();
+    
   }, [limit, publicKey]);
   
   // Handle the click event of the play button

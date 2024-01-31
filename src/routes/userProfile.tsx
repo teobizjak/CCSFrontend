@@ -1,268 +1,212 @@
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import ProfilePhoto from '../components/profilePhoto';
-import socket from './socket';
-import ResultsTable from '../components/resultsTable';
+import { useWallet } from '@solana/wallet-adapter-react'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import EditProfileModal from '../components/editProfileModal'
+import socket from './socket'
+import ProfileInfo from '../components/profileInfo'
+import UserGames from '../components/userGames'
+import Heading from '../components/heading'
 
 function UserProfile() {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
     const { publicKey } = useParams();
-  // Replace this with your wallet name
-  axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION;
+    // Replace this with your wallet name
+    axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION
 
-  const [streak, setStreak] = useState("");
-  const [limit, setLimit] = useState(5);
-  const [games, setGames] = useState([]);
-  
+    const walletName = publicKey || "undefined";
 
-  const analyze = (roomId) =>{
-    navigate(`/analyzeGame/${roomId}`)
-  }
+    const [streak, setStreak] = useState('')
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [limit, setLimit] = useState(10)
+    const [games, setGames] = useState([])
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(0)
 
-
-  const [user, setUser] = useState({
-    firstName: "",
-    lastName: "",
-    walletAccount: publicKey,
-    won: 0,
-    drawn: 0,
-    lost: 0,
-    paid: 0,
-    winnings: 0,
-    elo: 300,
-    picture: "avatar",
-    readyToRedeem:0,
-    gamesUnderReview:0
-  });
-
-  const fetchUserData = async () => {
-    try {
-      const response = await axios.get(`/user/${publicKey}`);
-      const userData = response.data;
-      setUser(prevUser => ({
-        ...prevUser,
-        ...userData
-      }));
-      
-    } catch (error) {
-      console.error('Error fetching user:', error);
+    const analyze = (roomId) => {
+        navigate(`/analyzeGame/${roomId}`)
     }
-    try {
-      const response = await axios.get(`/userGamesData/${publicKey}`);
-      const userData = response.data;
-      setUser(prevUser => ({
-        ...prevUser,
-        ...userData
-      }));
-      
-    } catch (error) {
-      console.error('Error fetching user:', error);
-    }
-  };
 
-
-  useEffect(() => {
-    if (!publicKey) return;
-    fetchData();
-    fetchUserData();
-  }, [publicKey]); 
-
-  
-  function loadMore(){
-    setLimit(limit + 5)
-  }
-
-  useEffect(() => {
-    console.log(`getting games from ${publicKey}`);
-    
-    axios.get(`/games/${publicKey}`, {
-      params: {
-        results: limit
-      }
+    const [user, setUser] = useState({
+        firstName: '',
+        lastName: '',
+        walletAccount: publicKey,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        paid: 0,
+        winnings: 0,
+        elo: 300,
+        picture: 'avatar',
+        readyToRedeem: 0,
+        gamesUnderReview: 0,
     })
-    
-      .then(response => {
-        setGames(response.data);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
 
-  }, [limit, publicKey]);
-  useEffect(() => {
-    if (publicKey) {
-      socket.emit("updateUserToken", publicKey, (r) => {
-        console.log(r);
-        localStorage.setItem('token', r);
-        console.log("token is");
-        
-        console.log(localStorage.getItem("token"));
-        
-      });
+    const fetchUserData = async () => {
+        try {
+            const response = await axios.get(`/user/${publicKey}`)
+            const userData = response.data
+            setUser((prevUser) => ({
+                ...prevUser,
+                ...userData,
+            }))
+        } catch (error) {
+            console.error('Error fetching user:', error)
+        }
+        try {
+            const response = await axios.get(`/userGamesData/${publicKey}`)
+            const userData = response.data
+            setUser((prevUser) => ({
+                ...prevUser,
+                ...userData,
+            }))
+        } catch (error) {
+            console.error('Error fetching user:', error)
+        }
     }
-  }, []);
-  useEffect(() => {
-    let str = "";
-    games.map((game, index) => {
-      let result;
-      if (game.winner === "draw") {
-        result = "Draw";
-        str += "D";
-      } else if ((game.winner === "white" && game.white === publicKey) || (game.winner === "black" && game.black === publicKey)) {
-        result = "Win";
-        str += "W";
-      } else {
-        result = "Defeat";
-        str += "L";
-      }
-      if (str.length > 5) {
-        str = str.slice(0, 5);
-      }
-    });
-    setStreak(str);
-  }, [games]);
 
+    useEffect(() => {
+        if (publicKey) {
+            fetchData()
+            fetchUserData()
+        }
+    }, [publicKey, currentPage])
+    const fetchData = async () => {
+        if (!publicKey) return
+        const pageSize = 10 // Set the number of items per page
+        try {
+            const response = await axios.get(`/games/${publicKey}`, {
+                params: {
+                    page: currentPage,
+                    pageSize: pageSize,
+                },
+            })
 
-      const handlePlay = () => {
-        // Add your logic here
-        console.log("Play the game");
-        navigate("/play");
-        
-      };
-      const fetchData = () => {
-        console.log(`getting games from ${publicKey}`);
-        
-        axios.get(`/games/${publicKey}`, {
-          params: {
-            results: limit
-          }
-        })
-        .then(response => {
-          setGames([]);
-          setGames(response.data);
-      
-          response.data.map((game, index) => {
-            let result;
-            if (game.winner === "draw") {
-              result = "Draw";
-              str += "D";
-            } else if ((game.winner === "white" && game.white === publicKey) || (game.winner === "black" && game.black === publicKey)) {
-              result = "Win";
-              str += "W";
+            setGames(response.data.games)
+            setTotalPages(response.data.totalPages)
+        } catch (error) {
+            console.error('Error:', error)
+        }
+    }
+
+    useEffect(() => {
+        console.log(`getting games from ${publicKey}`)
+
+        axios
+            .get(`/games/${publicKey}`, {
+                params: {
+                    results: limit,
+                },
+            })
+
+            .then((response) => {
+                let sortedGames = [...response.data].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                )
+                setGames(response.data)
+            })
+            .catch((error) => {
+                console.error('Error:', error)
+            })
+    }, [limit, publicKey])
+    useEffect(() => {
+        if (publicKey) {
+            socket.emit('updateUserToken', publicKey, (r) => {
+                console.log(r)
+                localStorage.setItem('token', r)
+                console.log('token is')
+
+                console.log(localStorage.getItem('token'))
+            })
+        }
+    }, [])
+    useEffect(() => {
+        let str = ''
+        games.map((game, index) => {
+            let result
+            if (game.winner === 'draw') {
+                result = 'Draw'
+                str += 'D'
+            } else if (
+                (game.winner === 'white' &&
+                    game.white === publicKey) ||
+                (game.winner === 'black' &&
+                    game.black === publicKey)
+            ) {
+                result = 'Win'
+                str += 'W'
             } else {
-              result = "Defeat";
-              str += "L";
+                result = 'Defeat'
+                str += 'L'
             }
             if (str.length > 5) {
-              str = str.slice(0, 5);
+                str = str.slice(0, 5)
             }
-          });
-          setStreak(str);
         })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-        let str = "";
-      };
-  return (
-    <div className="h-full w-full bg-gray-900">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-screen bg-purple-100 relative">
-      <div className="flex flex-col items-center justify-center h-full">
-        <div className="rounded-full border-4 border-purple-900 w-32 h-32 overflow-hidden">
-        <ProfilePhoto src={user.picture} className="w-full h-full object-cover" />
-        </div>
-        <div className="mt-4 text-2xl font-bold text-gray-900">{user.firstName ? user.firstName : "no name"} {user.lastName ? user.lastName : "no last name"} {"("+user.elo+")"}</div>
-        <div className="mt-2 text-lg text-gray-700">{user.walletAccount}</div>
-        <div className="mt-4 flex space-x-4">
-          <div className="bg-purple-200 p-2 rounded-lg">
-            <div className="text-sm text-gray-600">Wins</div>
-            <div className="text-xl text-gray-900">{user.won}</div>
-          </div>
-          <div className="bg-purple-200 p-2 rounded-lg">
-            <div className="text-sm text-gray-600">Draws</div>
-            <div className="text-xl text-gray-900">{user.drawn}</div>
-          </div>
-          <div className="bg-purple-200 p-2 rounded-lg">
-            <div className="text-sm text-gray-600">Defeats</div>
-            <div className="text-xl text-gray-900">{user.lost}</div>
-          </div>
-        </div>
-        <div className="mt-4 flex space-x-4">
-          <div className="bg-purple-200 p-2 rounded-lg">
-            <div className="text-sm text-gray-600">Money paid</div>
-            <div className="text-xl text-gray-900">{user.paid.toFixed(2)} SOL</div>
-          </div>
-          <div className="bg-purple-200 p-2 rounded-lg">
-            <div className="text-sm text-gray-600">Money earned</div>
-            <div className="text-xl text-gray-900">{user.winnings.toFixed(4)} SOL</div>
-          </div>
-          <div className="bg-purple-200 p-2 rounded-lg">
-            <div className="text-sm text-gray-600">Profit</div>
-            <div className="text-xl text-gray-900">{(user.winnings - user.paid).toFixed(4)} SOL</div>
-          </div>
-        </div>
-        <div className="mt-4 flex space-x-4">
-          <div className="bg-purple-200 p-2 rounded-lg">
-            <div className="text-sm text-gray-600">Money ready to be redeemed</div>
-            <div className="text-xl text-gray-900">{user.readyToRedeem}</div>
-          </div>
-          <div className="bg-purple-200 p-2 rounded-lg">
-            <div className="text-sm text-gray-600">Games under review</div>
-            <div className="text-xl text-gray-900">{user.gamesUnderReview}</div>
-          </div>
-        </div>
-          <table className="w-full text-center border-collapse">
-          <thead>
-            <tr>
-              <th className="border p-4">Opponent</th>
-              <th className="border p-4">Your color</th>
-              <th className="border p-4">Result</th>
-              <th className="border p-4">Claim reward</th>
-              <th className="border p-4">Options</th>
-            </tr>
-          </thead>
-          <tbody>
-      {games.map((game, index) => {
-        let result;
-        if (game.winner === "draw") {
-          result = "Draw";
-        } else if (game.winner === "white" && game.white === publicKey) {
-          result = "Win";
-        } else if (game.winner === "black" && game.black === publicKey) {
-          result = "Win";
-        } else {
-          result = "Defeat";
-        }
+        setStreak(str)
+    }, [games])
 
-        let opponent = game.white === publicKey ? game.black : game.white;
-        let opponentSliced = opponent ? opponent.slice(0, 8) : "none";
-        let colorTxId = game.white === publicKey ? "whiteTxnId" : "blackTxnId";
+    const handlePlay = () => {
+        // Add your logic here
+        console.log('Play the game')
+        navigate('/play')
+    }
 
-        return (
-          <tr key={index}>
-            <td className="border p-4 cursor-pointer" onClick={() =>{navigate(`/profile/${opponent}`)}}>{opponentSliced}...</td>
-            <td className="border p-4">{game.white === publicKey ? "white" : "black" }</td>
-            <td className="border p-4">{result}</td>
-            <td className="border p-4">
-              {result !== "Defeat" ?
-              game[colorTxId] ? <a href={"https://explorer.solana.com/tx/" + game[colorTxId] + "?cluster=devnet"} target="blank">{"Claimed: "+game[colorTxId].slice(0,8)+"..."}</a>  :
-              <span>Awaiting claim</span>
-              : <span className=" cursor-default">You lost</span>
-              }
-            </td>
-            <td className="border p-4"><button onClick={() => analyze(game.roomId)}>Analyze</button></td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
-  {games.length === 0 ? <div className=" w-fit mx-auto mt-4">You haven't played any games</div> :<div className=" w-fit mx-auto mt-4" onClick={loadMore}>Load more</div>}
+    function navigateToProfile(profile) {
+        navigate(`/profile/${profile}`)
+    }
+    // Handle the click event of the claim reward button
+    const handleClaim = (roomId) => {
+        // Add your logic here
+        console.log(`Claim ${roomId}`)
+        //for refreshing purposes
+        axios
+            .post(`/claim/${roomId}`)
+            .then((response) => {
+                console.log('response: ', response.data)
+                fetchData()
+                fetchUserData()
+            })
+            .catch((error) => {
+                console.error('Error:', error)
+            })
+    }
+    return (
+        <div className="h-full w-full bg-gray-900">
+            <div className="relative mx-auto min-h-screen max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                {isEditOpen && (
+                    <EditProfileModal
+                        isEditOpen={isEditOpen}
+                        setIsEditOpen={setIsEditOpen}
+                        user={user}
+                        setUser={setUser}
+                        axios={axios}
+                        publicKey={publicKey}
+                    />
+                )}
+                <div className="grid gap-8 text-white md:grid-cols-3">
+                    <aside className="col-span-1 space-y-8">
+                            <ProfileInfo user={user} isOwned={false} setIsEditOpen={setIsEditOpen} />
+                    </aside>
+
+                    <main className="col-span-2 space-y-8">
+                    {games.length === 0 ? (
+                            <>
+                                {' '}
+                                <Heading>Your Games</Heading>{' '}
+                                <p className="text-white">
+                                    User hasn't played any games.
+                                </p>{' '}
+                            </>
+                        ) : (
+                      <UserGames games={games} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} publicKey={publicKey} navigateToProfile={navigateToProfile} handleClaim={handleClaim} analyze={analyze} isOwner={false}  />
+                        )}
+                      </main>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    )
 }
 
-export default UserProfile;
+export default UserProfile
+

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Heading from './heading';
 
 const Leaderboard = () => {
   const [activeTab, setActiveTab] = useState('tab1');
@@ -55,14 +56,17 @@ const Leaderboard = () => {
       case 'tab2': // Wins
         return <>{renderPlayerIdentity(item)} - {item.won}</>;
       case 'tab3': // Winnings
-        return <>{renderPlayerIdentity(item)} - {item.winnings}</>;
+        return <>{renderPlayerIdentity(item)} - {item.winnings} SOL</>;
       default:
         return '';
     }
   };
 
   return (
+    <>
+    
     <div className="container mx-auto p-4">
+    <Heading>Leaderboard</Heading>
       <div className="flex w-full space-x-2 mb-4">
         <TabButton label="Elo" tab="tab1" />
         <TabButton label="Wins" tab="tab2" />
@@ -79,6 +83,7 @@ const Leaderboard = () => {
         </ul>
       </div>
     </div>
+    </>
   );
 };
 
