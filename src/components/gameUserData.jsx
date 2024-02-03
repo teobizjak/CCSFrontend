@@ -24,7 +24,6 @@ function GameUserData({ user, timer, name }) {
       />
     </div>
     <span className='relative'>
-      {`${name}: `}
       {user.firstName || user.lastName
         ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
         : user.walletAddress.slice(0,8) + "..."}

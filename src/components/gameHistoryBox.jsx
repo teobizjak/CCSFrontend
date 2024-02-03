@@ -44,20 +44,31 @@ function GameHistoryBox({ chess, fenHistory, setIsPlayback, setPlaybackIndex }) 
   };
 
   return (
-    <div>
-      <ol className='list-decimal list-inside'>
-        {history.map((turn, index) => (
-          <li key={index}>
-            {turn.white && (
-              <span onClick={loadFen(2* index + 1)}>{`${turn.white} `}</span>
-            )}
-            {turn.black && (
-              <span onClick={loadFen(2* index + 2)}>{` ${turn.black}`}</span>
-            )}
-          </li>
-        ))}
-      </ol>
-    </div>
+    <div className="flex-grow overflow-y-auto max-h-72">
+    <ol className="list-decimal list-inside text-white">
+      {history.map((turn, index) => (
+        <li key={index} className="list-decimal list-inside flex items-center justify-start my-1">
+          <span className=' w-8'>{index + 1}. </span>
+          
+          <span 
+            onClick={loadFen(2 * index + 1)} 
+            className="cursor-pointer bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded text-center mr-2 flex-1"
+            style={{ minWidth: '20px' }}  // Set a minimum width to accommodate text
+          >
+            {turn.white || '...'}
+          </span>
+          <span 
+            onClick={loadFen(2 * index + 2)} 
+            className="cursor-pointer bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded text-center flex-1"
+            style={{ minWidth: '20px' }}  // Apply the same minimum width for consistency
+          >
+            {turn.black || '...'}
+          </span>
+        </li>
+      ))}
+    </ol>
+  </div>
+  
   );
 }
 
