@@ -50,3 +50,49 @@ iframe#webpack-dev-server-client-overlay {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
+
+.reply-enter {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+.reply-enter-active {
+  opacity: 1;
+  transform: translateY(0px);
+  transition: opacity 300ms, transform 300ms;
+}
+.reply-exit {
+  opacity: 1;
+}
+.reply-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+/* Start state for entering */
+.answer-enter {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 300ms, max-height 300ms ease-in-out;
+}
+
+/* End state for entering */
+.answer-enter-active {
+  opacity: 1;
+  max-height: 500px; /* Adjust max-height based on your content's size */
+}
+
+/* Start state for exiting */
+.answer-exit {
+  opacity: 1;
+  max-height: 500px;
+}
+
+/* End state for exiting */
+.answer-exit-active {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 300ms, max-height 300ms ease-in-out;
+}
+

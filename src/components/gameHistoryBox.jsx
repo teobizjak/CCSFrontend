@@ -12,6 +12,8 @@ function GameHistoryBox({ chess, fenHistory, setIsPlayback, setPlaybackIndex }) 
     const updateHistory = () => {
       const moves = chess.history({ verbose: true }); // Get verbose history
       const newHistory = []; // Initialize a new history array to build
+      console.log(`trigger update history chess`, chess);
+      console.log(`trigger update history moves`, moves);
 
       moves.forEach((move, index) => {
         const turnIndex = Math.floor(index / 2); // Calculate turn index
@@ -37,10 +39,15 @@ function GameHistoryBox({ chess, fenHistory, setIsPlayback, setPlaybackIndex }) 
 
   // Click handler to log the FEN of the clicked move
   const loadFen = (index) => () => {
-    console.log("loading fen index", index);
-    console.log("all fens", fenHistory);
+
+    if (index >= fenHistory.length) {
+      console.log("index bigger or eq then fhl");
+      setPlaybackIndex(index);
+    }else{
+      setPlaybackIndex(index);
+    }
     setIsPlayback(true);
-    setPlaybackIndex(index);
+    
   };
 
   return (

@@ -130,7 +130,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                 }
             }
         },
-        [chess, gameState]
+        [chess, gameState, isPlayback, playbackIndex]
     )
     const handleReportCheating = useCallback(() => {
         const cheater = orientation === 'white' ? 'Black' : 'White'
@@ -209,8 +209,9 @@ export default function Game({ players, room, orientation, cleanup }) {
                 color: chess.turn(),
                 promotion: 'q',
             }
-
+            
             const move = makeAMove(moveData)
+            if (move === null || move === false) return false;
             const user = orientation === 'white' ? players[0] : players[1]
             if (gameState.over === '') {
                 if (move === null) return false
@@ -268,7 +269,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                         clickedSquare: null,
                     }))
                     setCustomSquareStyles({})
-                    if (move === null) return false
+                    if (move === null || move === false) return false
                     socket.emit('move', {
                         move,
                         room,
@@ -443,6 +444,15 @@ export default function Game({ players, room, orientation, cleanup }) {
             }
         })
 
+        socket.on('errorOnMove', (dt) => {
+            console.log(dt.turn);
+            console.log(orientation[0]);
+            if (dt.turn === orientation[0]) {
+                alert("wrong move!");
+            }
+            
+        })
+
 
         // Cleanup socket listeners on unmount
         return () => {
@@ -455,6 +465,7 @@ export default function Game({ players, room, orientation, cleanup }) {
             socket.off('drawAccepted')
             socket.off('drawOffered')
             socket.off('closeRoom')
+            socket.off('errorOnMove')
         }
     }, [
         makeAMove,
@@ -549,10 +560,16 @@ export default function Game({ players, room, orientation, cleanup }) {
                         </div>
                     </div>
                     <div>
-                        <h1 className="text-5xl font-bold mb-4">
-                            CryptoChess <FaChessBoard className="mb-1 inline" />
+                        <div className="text-6xl font-bold flex mb-4 items-end">
+                            <img
+                                className="aspect-auto w-8 mr-2"
+                                src="/logo192.png"
+                                alt="Logo"
+                            />
+                            <span className="text-4xl">CryptoChess</span>
+                            <span className="text-lg">.site</span>
+                        </div>
 
-                        </h1>
                         <div className="flex flex-col col-span-1 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-4 py-2 overflow-hidden">
 
                             <div className='flex-grow'>
@@ -579,28 +596,28 @@ export default function Game({ players, room, orientation, cleanup }) {
                                     </div>
                                 ) : (
                                     <>
-                                            <button onClick={handleResign} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
-                                                <FaFlag /> <span>Resign</span>
-                                            </button>
+                                        <button onClick={handleResign} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
+                                            <FaFlag /> <span>Resign</span>
+                                        </button>
                                         {gameState.drawOffered ? (
                                             <>
-                                                    <button onClick={handleAcceptDraw} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
-                                                        <FaCheck />
-                                                    </button>
-                                                    <button onClick={handleDeclineDraw} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
-                                                        <FaTimes />
-                                                    </button>
+                                                <button onClick={handleAcceptDraw} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
+                                                    <FaCheck />
+                                                </button>
+                                                <button onClick={handleDeclineDraw} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
+                                                    <FaTimes />
+                                                </button>
                                             </>
                                         ) : (
-                                                <button onClick={handleOfferDraw} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
-                                                    <FaHandshake /> <span>Offer Draw</span>
-                                                </button>
+                                            <button onClick={handleOfferDraw} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
+                                                <FaHandshake /> <span>Offer Draw</span>
+                                            </button>
                                         )}
                                     </>
                                 )}
-                                    <button onClick={handleReportCheating} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
-                                        <FaExclamationTriangle /> <span>Report</span>
-                                    </button>
+                                <button onClick={handleReportCheating} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
+                                    <FaExclamationTriangle /> <span>Report</span>
+                                </button>
                             </div>
                             <div className="flex justify-between mt-4 space-x-2 text-xs">
                                 {gameState.over && (

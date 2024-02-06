@@ -13,11 +13,6 @@ const Explore = () => {
                     Explore Chess Universe
                 </header>
 
-                {/* Navigation bar, consider making it a separate component for better reusability */}
-                <nav className="mb-8">
-                  {/* Navigation content here, possibly use ul/li for menu items with anchor tags */}
-                </nav>
-
                 <div className="grid gap-8 md:grid-cols-4">
                     {/* Left Column (smaller) */}
                     <aside className="md:col-span-1 space-y-8">

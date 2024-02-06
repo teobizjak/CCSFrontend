@@ -11,6 +11,7 @@ function GameUserData({ user, timer, name }) {
             .toString()
             .padStart(2, '0')}`
     }, [])
+    
     return (
         <>
             <>

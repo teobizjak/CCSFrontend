@@ -38,8 +38,8 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <img
-              className="h-8 w-8 flex-shrink-0"
-              src="/logo.png"
+              className="w-6 flex-shrink-0 shadow-lg"
+              src="/logo192.png"
               alt="Logo"
             />
           </div>

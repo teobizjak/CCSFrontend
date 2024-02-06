@@ -90,14 +90,15 @@ function Play() {
         <div className="h-full w-full bg-gray-900 text-white">
             <div className="mx-auto h-screen max-w-7xl px-4 sm:px-6 lg:px-8">
                 <nav className="flex items-center justify-between py-6">
-                    <h1 className="text-5xl font-bold">
-                        CryptoChess <FaChessBoard className="mb-1 inline" />
-                    </h1>
-                    <div className="rounded-full bg-purple-700 px-4 py-2 shadow-md">
-                        <p className="text-md font-medium">
-                            Wallet: {walletName}
-                        </p>
+                    <div className=" text-6xl font-bold flex">
+                    <img
+              className=" w-12 h-16 mr-2"
+              src="/logo192.png"
+              alt="Logo"
+            />
+            CryptoChess
                     </div>
+                    
                 </nav>
                 <div className="grid grid-cols-1 items-start gap-10 py-8 md:grid-cols-2">
                     <div

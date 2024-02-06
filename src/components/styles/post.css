@@ -1,0 +1,17 @@
+.reply-enter {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  .reply-enter-active {
+    opacity: 1;
+    transform: translateY(0px);
+    transition: opacity 300ms, transform 300ms;
+  }
+  .reply-exit {
+    opacity: 1;
+  }
+  .reply-exit-active {
+    opacity: 0;
+    transition: opacity 300ms;
+  }
+  
