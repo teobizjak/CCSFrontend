@@ -12,6 +12,12 @@ const UserStats = ({ user, streak }) => {
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
                         <span className="text-gray-300">Name:</span>
+                        <span className="font-semibold text-gray-100">{user.firstName || user.lastName
+                            ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+                            : user.walletAddress && user.walletAddress.slice(0, 8) + "..."}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Address:</span>
                         <span className="font-semibold text-gray-100">{user.walletAddress && `${user.walletAddress.slice(0, 8)}...`}</span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -20,8 +26,8 @@ const UserStats = ({ user, streak }) => {
                             <span
                                 key={index}
                                 className={`font-semibold ${char === 'W' ? 'text-green-400' :
-                                        char === 'D' ? 'text-white' :
-                                            char === 'L' ? 'text-red-400' : ''
+                                    char === 'D' ? 'text-white' :
+                                        char === 'L' ? 'text-red-400' : ''
                                     }`}
                             >
                                 {char}

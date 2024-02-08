@@ -4,10 +4,14 @@ import Engine from './engine';
 import { Chessboard } from 'react-chessboard';
 import axios from 'axios';
 import GameUserData from './gameUserData';
+import GameHistoryBox from './gameHistoryBox';
+import { FaSquare, FaSync } from 'react-icons/fa';
 
 function AnalysisPanel({ roomId }) {
   axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION;
   const engine = useMemo(() => new Engine(), []);
+  const [fenHistory, setFenHistory] = useState([]);
+  const [winner, setWinner] = useState("");
   const [whitePlayer, setWhitePlayer] = useState({ elo: 0, firstName: '', lastName: '', walletAddress: 'waiting...', picture: 'avatar' });
   const [blackPlayer, setBlackPlayer] = useState({ elo: 0, firstName: '', lastName: '', walletAddress: 'waiting...', picture: 'avatar' });
   const game = useRef(new Chess());
@@ -16,6 +20,29 @@ function AnalysisPanel({ roomId }) {
     "1.e4 e5 2.d3 Qg5 3.a4 Bc5 4.Qf3 a6 5.Qxf7"
   );
   const [msg, setMsg] = useState("");
+
+  const loadPgnAndGetFenHistory = (pgn) => {
+    console.log("loadpgnandsethistorystart");
+
+    const newGame = new Chess();
+    newGame.loadPgn(pgn);
+
+    const moves = newGame.history({ verbose: true });
+    const fens = [];
+
+    // Reset the game to start position
+    newGame.reset();
+
+    // Iterate over the moves and make each move to generate the FEN history
+    for (let move of moves) {
+
+      fens.push(newGame.fen());
+      newGame.move(move);
+    }
+    fens.push(game.current.fen());
+
+    setFenHistory(fens);
+  };
 
   const fetchUserData = async (userId, setPlayer) => {
     try {
@@ -41,12 +68,13 @@ function AnalysisPanel({ roomId }) {
     try {
       const response = await axios.get(`/game/${roomId}`); // Use await to wait for the promise to resolve
       console.log(`response of server call for pgn: ${response.data.pgn}`);
-      const { fen, black, white, turn, whiteTime, blackTime, duration, pgn } = response.data;
+      const { fen, black, white, turn, whiteTime, blackTime, duration, pgn, winner } = response.data;
 
       // Await the user data fetches in sequence
       await fetchUserData(black, setBlackPlayer);
       await fetchUserData(white, setWhitePlayer);
-
+      setWinner(winner);
+      loadPgnAndGetFenHistory(pgn);
       setPgn(pgn);
     } catch (error) {
       console.error('Error:', error);
@@ -226,42 +254,80 @@ function AnalysisPanel({ roomId }) {
 
   return (
     <div className="grid grid-cols-1 items-start gap-14 py-8 md:grid-cols-7">
-      <div className=" h-fit col-span-4 my-auto rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-6 text-white shadow-xl">
+      <div className=" h-fit col-span-4 my-auto rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-6 text-white">
         {/* White Player Info */}
 
         <div>
-                            <div className="flex w-full items-center justify-between py-4">
-                                <GameUserData user={blackPlayer} timer={455} name={"Opponent"} />
-                            </div>
-                            <div className='flex flex-1'>
-          <div className="w-6 bg-white flex-grow flex-row">
-            <div style={{ height: height + '%' }} className="w-full bg-black relative transition-all duration-1000 delay-150"><span className=' absolute bottom-0 left-1/2 text-white -translate-x-1/2 -translate-y-1/2 text-xs'>{height > 50 ? evaluation : ""}</span></div>
-            <div className='w-full bg-white relative'><span className=' absolute top-0 left-1/2 text-black -translate-x-1/2 translate-y-1/2 text-xs'>{height <= 50 ? evaluation : ""}</span></div>
+          <div className="flex w-full items-center justify-between py-4">
+            <GameUserData user={blackPlayer} timer={455} name={"Opponent"} />
           </div>
-          <div className="flex w-full">
-            <Chessboard
-              position={fen}
-              boardOrientation={orientation}
+          <div className='flex flex-1'>
+            <div className="w-6 bg-white flex-grow flex-row">
+              <div style={{ height: height + '%' }} className="w-full bg-black relative transition-all duration-1000 delay-150"><span className=' absolute bottom-0 left-1/2 text-white -translate-x-1/2 -translate-y-1/2 text-xs'>{height > 50 ? evaluation : ""}</span></div>
+              <div className='w-full bg-white relative'><span className=' absolute top-0 left-1/2 text-black -translate-x-1/2 translate-y-1/2 text-xs'>{height <= 50 ? evaluation : ""}</span></div>
+            </div>
+            <div className="flex w-full">
+              <Chessboard
+                position={fen}
+                boardOrientation={orientation}
 
-            />
+              />
+            </div>
+          </div>
+          <div className="flex w-full items-center justify-between py-4">
+            <GameUserData user={whitePlayer} timer={455} name={"You"} />
           </div>
         </div>
-                            <div className="flex w-full items-center justify-between py-4">
-                                <GameUserData user={whitePlayer} timer={455} name={"You"} />
-                            </div>
-                        </div>
       </div>
+      <div className='col-span-3'>
+        <div className="text-6xl font-bold  flex mb-4 items-end text-white">
+          <img
+            className="aspect-auto w-8 mr-2"
+            src="/logo192.png"
+            alt="Logo"
+          />
+          <span className="text-4xl">CryptoChess</span>
+          <span className="text-lg">.site</span>
 
-      <div className="w-full md:w-1/2 h-96 flex flex-col justify-center items-center">
-        <div className="Evaluation">
-          {
-            msg === "" ? <p>Evaluation: {evaluation}</p> : msg
-          }
-
-          <p>Line1: {transformToSAN(fen, line1)}</p>
-          <p>Line2: {transformToSAN(fen, line2)}</p>
-          <p>Line3: {transformToSAN(fen, line3)}</p>
         </div>
+
+        <div className="flex flex-col rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-4 py-2 overflow-hidden text-white">
+          <div className='flex-grow'>
+            <div className='flex justify-between items-center mb-4'>
+              <div className='flex items-center'>
+                <FaSquare className=' text-white mr-1'/>{whitePlayer.walletAddress?.slice(0, 8)}... - <FaSquare className=' text-black ml-2 mr-1'/>{blackPlayer.walletAddress?.slice(0, 8)}... 
+              </div>
+              <FaSync className='text-white hover:text-purple-600 transition-colors duration-1000 cursor-pointer' />
+            </div>
+
+            {/* Evaluation and Lines Information */}
+            <div className="mb-4 px-4 bg-gray-900 rounded-lg py-4">
+              <div className="Evaluation text-sm md:text-base">
+                {msg === "" ? (
+                  <p className="font-semibold">Evaluation: <span className="font-normal">{evaluation}</span></p>
+                ) : (
+                  <></>
+                )}
+                <div className=' custom-x-scrollbar w-full overflow-x-auto flex whitespace-nowrap my-2'>
+                  <p className=' font-semibold'>Line1: <span className="font-normal">{transformToSAN(fen, line1)}</span></p>
+                </div>
+                <div className='custom-x-scrollbar w-full overflow-x-auto flex whitespace-nowrap my-2'>
+                  <p className=' font-semibold'>Line2: <span className="font-normal">{transformToSAN(fen, line2)}</span></p>
+                </div>
+                <div className='custom-x-scrollbar w-full overflow-x-auto flex whitespace-nowrap my-2'>
+                  <p className=' font-semibold'>Line3: <span className="font-normal">{transformToSAN(fen, line3)}</span></p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-grow overflow-auto bg-gray-900 rounded-lg px-4 py-4">
+            <GameHistoryBox chess={game.current} fenHistory={fenHistory} setPlaybackIndex={index} />
+          </div>
+          <div className='flex w-full justify-center py-2'>{winner === "draw" ? "Draw" : <><span className=' capitalize mr-1'>{winner} </span>wins</>}</div>
+        </div>
+
       </div>
     </div>
   )

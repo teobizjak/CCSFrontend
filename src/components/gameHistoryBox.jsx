@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function GameHistoryBox({ chess, fenHistory, setIsPlayback, setPlaybackIndex }) {
+function GameHistoryBox({ chess, fenHistory, setIsPlayback = ()=>{return false}, setPlaybackIndex = null }) {
   const [history, setHistory] = useState([]); // Initialize history as an array of turns
   
 
