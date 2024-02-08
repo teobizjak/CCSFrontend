@@ -22,6 +22,7 @@ const recentActivities = [
 ];
 
 function Home() {
+  
 
   interface UserData {
     createdAt?: string;
@@ -50,6 +51,7 @@ function Home() {
   const walletName = publicKey ? publicKey.toBase58().slice(0, 8) + '...' : "please connect wallet";
   const [streak, setStreak] = useState("");
   const [limit, setLimit] = useState(5);
+  const [isUserStatsNull, setIsUserStatsNull] = useState(true);
   const [games, setGames] = useState([]);
   const [userData, setUserData] = useState<UserData>({});
 
@@ -59,7 +61,9 @@ function Home() {
 
   const fetchData = () => {
     console.log(`getting games from ${publicKey}`);
-
+    if (publicKey != null) {
+      setIsUserStatsNull(false);
+    
     axios.get(`/games/${publicKey}`, {
       params: {
         results: limit
@@ -94,6 +98,9 @@ function Home() {
       .catch(error => {
         console.error('Error:', error);
       });
+    }else{
+      setStreak("")
+    }
     let str = "";
   };
 
@@ -107,16 +114,11 @@ function Home() {
     }
     if (publicKey) {
       fetchUserData()
-      socket.emit("updateUserToken", publicKey, (r) => {
-        console.log(r);
-        localStorage.setItem('token', r);
-        console.log("token is");
-
-        console.log(localStorage.getItem("token"));
-
-      });
+      
+    }else{
+      setIsUserStatsNull(true);
     }
-  }, []);
+  }, [publicKey]);
   useEffect(() => {
     async function checkSiteTitle() {
 
@@ -196,7 +198,7 @@ function Home() {
             <Forum />
           </main>
           <aside className="col-span-1 space-y-8">
-            <UserStats user={userData} streak={streak} />
+            <UserStats user={userData} streak={streak} isUserDataNull={isUserStatsNull} />
             <FeaturedPlayers />
             <RecentActivity activities={recentActivities} />
             <div>

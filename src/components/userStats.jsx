@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const UserStats = ({ user, streak }) => {
+const UserStats = ({ user, streak, isUserDataNull = false }) => {
     const [profit, setProfit] = useState(0);
     useEffect(() => {
         setProfit(user.winnings - user.paid)
@@ -12,17 +12,17 @@ const UserStats = ({ user, streak }) => {
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
                         <span className="text-gray-300">Name:</span>
-                        <span className="font-semibold text-gray-100">{user.firstName || user.lastName
+                        <span className="font-semibold text-gray-100">{isUserDataNull ? "Without name" :user.firstName || user.lastName
                             ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
                             : user.walletAddress && user.walletAddress.slice(0, 8) + "..."}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-gray-300">Address:</span>
-                        <span className="font-semibold text-gray-100">{user.walletAddress && `${user.walletAddress.slice(0, 8)}...`}</span>
+                        <span className="font-semibold text-gray-100">{isUserDataNull ? "Not connected":user.walletAddress && `${user.walletAddress.slice(0, 8)}...`}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-gray-300">Streak:</span>
-                        <span className="font-semibold text-gray-100">{streak && streak.split('').map((char, index) => (
+                        <span className="font-semibold text-gray-100">{isUserDataNull ? "no games played":streak && streak.split('').map((char, index) => (
                             <span
                                 key={index}
                                 className={`font-semibold ${char === 'W' ? 'text-green-400' :
@@ -36,17 +36,20 @@ const UserStats = ({ user, streak }) => {
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-gray-300">Record (W/D/L):</span>
-                        <span className="font-semibold text-gray-100">{user.won} / {user.drawn} / {user.lost}</span>
+                        <span className="font-semibold text-gray-100">{isUserDataNull ? "0/0/0" : user.won + "/" + user.drawn + "/" + user.lost}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-gray-300">ELO:</span>
-                        <span className="font-semibold text-gray-100">{user.elo}</span>
+                        <span className="font-semibold text-gray-100">{isUserDataNull ? "800" : user.elo}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-gray-300">Profit:</span>
-                        <span className={`font-semibold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {isUserDataNull ? <span className={`font-semibold text-white`}>
+                            0 SOL
+                        </span> : <span className={`font-semibold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {profit >= 0 ? `+${profit.toFixed(3)}` : profit.toFixed(3)} SOL
-                        </span>
+                        </span>}
+                        
                     </div>
                 </div>
             </div>
