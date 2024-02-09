@@ -34,7 +34,7 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
         );
           try {
             if (true) {
-              joinOrCreate(bet);
+              joinGame(0.01, "asdf");
             }else{
 
             
@@ -49,7 +49,7 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
             if (signatureStatus){
               setInitMessage("Joining game...");
               console.log("Transaction successful, executing joinOrCreate");
-              joinOrCreate(bet); // Call joinOrCreate after successful transaction
+              joinGame(bet, txId); // Call joinOrCreate after successful transaction
             }else{
               navigate("/play");
             }
@@ -72,11 +72,29 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
       };
     
   }, []);
+  function joinGame(bet, txId){
+    const token = localStorage.getItem(`token-${publicKey.toString()}`);
+    const data = {bet, publicKey, token, txId}
+    socket.emit("joinGame", data , (r) => {
+      console.log("response from server for joingame", r);
+      
+      if (r?.orientation === "white") {
+        setRoom(r?.roomId);
+        setOrientation(r?.orientation);
+      }else if (r?.orientation === "black") {
+        setRoom(r?.roomId);
+        setPlayers(r?.players);
+        setOrientation(r?.orientation);
+      }
+      
+    })
+  }
   function joinOrCreate(betAmount) {
-    const data = {bet: betAmount, wallet: publicKey}
+    const token = localStorage.getItem(`token-${publicKey.toString()}`);
+    const data = {bet: betAmount, wallet: publicKey, token}
     socket.emit("askForRooms", data , (r) => {
       if (r !== "null") {
-        socket.emit("joinRoom", { roomId: r, publicKey }, (r) => {
+        socket.emit("joinRoom", { roomId: r, publicKey, token }, (r) => {
           // r is the response from the server
           if (r.error) return setRoomError(r.message); // if an error is returned in the response set roomError to the error message and exit
           console.log("response:", r);
@@ -85,7 +103,7 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
           setOrientation("black"); // set orientation as black
         });
       }else{
-      let data = {publicKey, betAmount}
+      let data = {publicKey, betAmount, token}
       socket.emit("createRoom", data ,(r) => {
         console.log(r);
         setRoom(r);

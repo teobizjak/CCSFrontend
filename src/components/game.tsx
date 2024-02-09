@@ -7,36 +7,45 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import GameUserData from './gameUserData'
 import { getUserData } from '../functions/getUser'
 import GameHistoryBox from './gameHistoryBox'
-import { FaArrowLeft, FaCheck, FaChessBoard, FaExclamationTriangle, FaFlag, FaHandshake, FaSync, FaTimes } from 'react-icons/fa'
+import {
+    FaArrowLeft,
+    FaCheck,
+    FaChessBoard,
+    FaExclamationTriangle,
+    FaFlag,
+    FaHandshake,
+    FaSquare,
+    FaSync,
+    FaTimes,
+} from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import Tooltip from './tooltip'
 
-
-
 export default function Game({ players, room, orientation, cleanup }) {
     interface UserData {
-        createdAt?: string;
-        drawn?: number;
-        elo?: number;
-        eloK?: number;
-        firstName?: string;
-        lastName?: string;
-        lost?: number;
-        paid?: number;
-        siteTitle?: string;
-        title?: string;
-        picture?: string;
-        reported?: number;
-        updatedAt?: string;
-        walletAddress?: string;
-        winnings?: number;
-        won?: number;
+        createdAt?: string
+        drawn?: number
+        elo?: number
+        eloK?: number
+        firstName?: string
+        lastName?: string
+        lost?: number
+        paid?: number
+        siteTitle?: string
+        title?: string
+        picture?: string
+        reported?: number
+        updatedAt?: string
+        walletAddress?: string
+        winnings?: number
+        won?: number
     }
     const chess = useMemo(() => new Chess(), [])
     const [fen, setFen] = useState(chess.fen())
-    const [isPlayback, setIsPlayback] = useState(false);
-    const [resignModal, setResignModal] = useState(false);
-    const [playbackIndex, setPlaybackIndex] = useState(0);
+    const [isPlayback, setIsPlayback] = useState(false)
+    const [resignModal, setResignModal] = useState(false)
+    const [token, setToken] = useState('none')
+    const [playbackIndex, setPlaybackIndex] = useState(0)
     const [gameState, setGameState] = useState({
         over: '',
         offerDraw: false,
@@ -47,7 +56,7 @@ export default function Game({ players, room, orientation, cleanup }) {
     const { publicKey } = useWallet()
     const [timers, setTimers] = useState({ timer1: 10 * 60, timer2: 10 * 60 })
     const [customSquareStyles, setCustomSquareStyles] = useState({})
-    const [fenHistory, setFenHistory] = useState([]);
+    const [fenHistory, setFenHistory] = useState([])
     const [user, setUser] = useState<UserData>({
         walletAddress: publicKey?.toBase58(),
         elo: 300,
@@ -58,15 +67,23 @@ export default function Game({ players, room, orientation, cleanup }) {
         elo: 300,
         picture: 'unknown',
     })
-    const navigate = useNavigate();
+    const navigate = useNavigate()
     const [userEloChange, setUserEloChange] = useState({
         whiteWin: { white: '0', black: '0' },
         blackWin: { white: '0', black: '0' },
         draw: { white: '0', black: '0' },
     })
-    const [userEloChangeWritable, setUserEloChangeWritable] = useState("0|0|0")
+    const [userEloChangeWritable, setUserEloChangeWritable] = useState('0|0|0')
 
     // Utility functions
+    useEffect(() => {
+        if (publicKey) {
+            const tk = localStorage.getItem(`token-${publicKey.toString()}`)
+            if (tk) {
+                setToken(tk)
+            }
+        }
+    }, [publicKey])
     const formatTime = useCallback((time) => {
         const minutes = Math.floor(time / 60)
         const seconds = time % 60
@@ -78,16 +95,16 @@ export default function Game({ players, room, orientation, cleanup }) {
     const makeAMove = useCallback(
         (move, fromOpponent = false) => {
             if (isPlayback && !fromOpponent) {
-                setIsPlayback(false);
+                setIsPlayback(false)
                 // Optionally, you might want to revert to the last move made before playback started
-                setPlaybackIndex(fenHistory.length - 1);
-                return false; // Indicating that no move was made
+                setPlaybackIndex(fenHistory.length - 1)
+                return false // Indicating that no move was made
             }
 
             // Exiting playback mode if the move is from the opponent or if a move is made outside playback
             if (isPlayback) {
-                setIsPlayback(false);
-                setPlaybackIndex(fenHistory.length);
+                setIsPlayback(false)
+                setPlaybackIndex(fenHistory.length)
             }
 
             setCustomSquareStyles({})
@@ -101,7 +118,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                     const result = chess.move(move)
                     setFen(chess.fen())
                     if (result) {
-                        setPlaybackIndex(playbackIndex + 1);
+                        setPlaybackIndex(playbackIndex + 1)
                     }
                     if (chess.isGameOver()) {
                         if (chess.isCheckmate()) {
@@ -145,6 +162,7 @@ export default function Game({ players, room, orientation, cleanup }) {
     const handleResign = useCallback(() => {
         const winTemp = orientation === 'white' ? 'Black' : 'White'
         const data = {
+            token: localStorage.getItem(`token-${publicKey.toString()}`),
             message: `${orientation} has resigned.`,
             room,
             winner: winTemp,
@@ -153,37 +171,37 @@ export default function Game({ players, room, orientation, cleanup }) {
         setGameState((prevState) => ({ ...prevState, over: winTemp }))
     }, [orientation, room])
     const handleNewGame = useCallback(() => {
-        navigate("/play");
+        navigate('/play')
     }, [])
     const handleHome = useCallback(() => {
-        navigate("/home");
+        navigate('/home')
     }, [])
 
     const handleArrowBack = useCallback(() => {
-        console.log("game state over is: ", gameState);
+        console.log('game state over is: ', gameState)
 
         if (gameState.over) {
-            navigate("/home");
+            navigate('/home')
         } else {
-            setResignModal(true);
+            setResignModal(true)
         }
     }, [gameState])
     const handleCloseResignModal = useCallback(() => {
-        setResignModal(false);
+        setResignModal(false)
     }, [])
     const handleConfirmResign = useCallback(() => {
-        handleResign();
-        setResignModal(false);
-        handleHome();
+        handleResign()
+        setResignModal(false)
+        handleHome()
     }, [])
 
     const handleOfferDraw = useCallback(() => {
-        socket.emit('offerDraw', { roomId: room })
+        socket.emit('offerDraw', { roomId: room, token: localStorage.getItem(`token-${publicKey.toString()}`)})
         setGameState((prevState) => ({ ...prevState, offerDraw: true }))
     }, [room])
 
     const handleAcceptDraw = useCallback(() => {
-        socket.emit('acceptDraw', { roomId: room })
+        socket.emit('acceptDraw', { roomId: room, token: localStorage.getItem(`token-${publicKey.toString()}`) })
     }, [room])
 
     const handleDeclineDraw = useCallback(() => {
@@ -191,12 +209,9 @@ export default function Game({ players, room, orientation, cleanup }) {
     }, [])
 
     useEffect(() => {
-        console.log("playback index", playbackIndex);
-        console.log("playback active", isPlayback);
-
+        console.log('playback index', playbackIndex)
+        console.log('playback active', isPlayback)
     }, [playbackIndex, isPlayback])
-
-
 
     const onDrop = useCallback(
         (sourceSquare, targetSquare) => {
@@ -209,13 +224,19 @@ export default function Game({ players, room, orientation, cleanup }) {
                 color: chess.turn(),
                 promotion: 'q',
             }
-            
+
             const move = makeAMove(moveData)
-            if (move === null || move === false) return false;
+            if (move === null || move === false) return false
             const user = orientation === 'white' ? players[0] : players[1]
             if (gameState.over === '') {
                 if (move === null) return false
+                console.log(`emitting move pk: ${publicKey}, tk: ${token}`)
+
                 socket.emit('move', {
+                    token: localStorage.getItem(
+                        `token-${publicKey.toString()}`
+                    ),
+                    publicKey,
                     move,
                     room,
                     user,
@@ -270,7 +291,13 @@ export default function Game({ players, room, orientation, cleanup }) {
                     }))
                     setCustomSquareStyles({})
                     if (move === null || move === false) return false
+                    console.log(`emitting move pk: ${publicKey}, tk: ${token}`)
+
                     socket.emit('move', {
+                        token: localStorage.getItem(
+                            `token-${publicKey.toString()}`
+                        ),
+                        publicKey,
                         move,
                         room,
                         user,
@@ -298,10 +325,10 @@ export default function Game({ players, room, orientation, cleanup }) {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const data = await getUserData(publicKey); // Passing userId as a parameter
-                console.log("myData", data);
+                const data = await getUserData(publicKey) // Passing userId as a parameter
+                console.log('myData', data)
 
-                setUser(data);
+                setUser(data)
             } catch (error) {
                 console.error('Error fetching user:', error)
             }
@@ -309,11 +336,14 @@ export default function Game({ players, room, orientation, cleanup }) {
 
         const fetchOpponentData = async () => {
             if (players.length > 1) {
-                const opponentPublicKey = orientation === 'white' ? players[1].username : players[0].username
-                const data = await getUserData(opponentPublicKey); // Passing userId as a parameter
-                console.log("opponentData", data);
+                const opponentPublicKey =
+                    orientation === 'white'
+                        ? players[1].username
+                        : players[0].username
+                const data = await getUserData(opponentPublicKey) // Passing userId as a parameter
+                console.log('opponentData', data)
 
-                setOpponent(data);
+                setOpponent(data)
             }
         }
 
@@ -326,42 +356,47 @@ export default function Game({ players, room, orientation, cleanup }) {
                 case 'ArrowLeft':
                     // Decrease playbackIndex if it's more than 0
                     if (playbackIndex > 0) {
-                        setPlaybackIndex((prevIndex) => prevIndex - 1);
-                        setIsPlayback(true);
+                        setPlaybackIndex((prevIndex) => prevIndex - 1)
+                        setIsPlayback(true)
                     }
-                    break;
+                    break
                 case 'ArrowRight':
                     // Increase playbackIndex if it's less than fenHistory.length
-                    console.log(`checking if playbackindex ${playbackIndex + 1} === fhl ${fenHistory.length - 1}`);
+                    console.log(
+                        `checking if playbackindex ${
+                            playbackIndex + 1
+                        } === fhl ${fenHistory.length - 1}`
+                    )
 
                     if (playbackIndex < fenHistory.length - 1) {
-                        setPlaybackIndex((prevIndex) => prevIndex + 1);
-                        setIsPlayback(true);
-                    } if (playbackIndex + 1 == fenHistory.length - 1) {
-                        // Set isPlayback to false if playbackIndex reaches the end of fenHistory
-                        setIsPlayback(false);
+                        setPlaybackIndex((prevIndex) => prevIndex + 1)
+                        setIsPlayback(true)
                     }
-                    break;
+                    if (playbackIndex + 1 == fenHistory.length - 1) {
+                        // Set isPlayback to false if playbackIndex reaches the end of fenHistory
+                        setIsPlayback(false)
+                    }
+                    break
                 default:
                     // Handle other keys if needed
-                    break;
+                    break
             }
-        };
+        }
 
         // Add event listener when component mounts
-        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keydown', handleKeyDown)
 
         // Cleanup the event listener when component unmounts
         return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [playbackIndex, fenHistory.length]);
+            window.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [playbackIndex, fenHistory.length])
 
     // Socket event listeners and game logic
     useEffect(() => {
         // Listener for 'move' event from socket
         socket.on('move', (dt) => {
-            makeAMove(dt.move, true);
+            makeAMove(dt.move, true)
         })
 
         // Listener for 'sync' event from socket
@@ -381,25 +416,29 @@ export default function Game({ players, room, orientation, cleanup }) {
 
         // Listener for 'eloChanges' event from socket
         socket.on('eloChanges', (dt) => {
-            console.log("eloChanges", dt);
+            console.log('eloChanges', dt)
 
-            let str = "";
+            let str = ''
             setUserEloChange(dt)
-            if (orientation === "white") {
-                str += " + " + dt.whiteWin.white + " | "; if (dt.draw.white > 0) {
-                    str += " + " + dt.draw.white
+            if (orientation === 'white') {
+                str += ' + ' + dt.whiteWin.white + ' | '
+                if (dt.draw.white > 0) {
+                    str += ' + ' + dt.draw.white
                 } else {
                     str += dt.draw.white
-                } str += " | " + dt.blackWin.white;
+                }
+                str += ' | ' + dt.blackWin.white
             } else {
-                str += dt.blackWin.black + " | "; if (dt.draw.black > 0) {
-                    str += "+" + dt.draw.black
+                str += dt.blackWin.black + ' | '
+                if (dt.draw.black > 0) {
+                    str += '+' + dt.draw.black
                 } else {
                     str += dt.draw.black
-                } str += " | " + dt.whiteWin.black;
+                }
+                str += ' | ' + dt.whiteWin.black
             }
-            console.log("eloChangesWritten", str);
-            setUserEloChangeWritable(str);
+            console.log('eloChangesWritten', str)
+            setUserEloChangeWritable(str)
         })
 
         // Listener for 'playerDisconnected' event
@@ -445,14 +484,12 @@ export default function Game({ players, room, orientation, cleanup }) {
         })
 
         socket.on('errorOnMove', (dt) => {
-            console.log(dt.turn);
-            console.log(orientation[0]);
+            console.log(dt.turn)
+            console.log(orientation[0])
             if (dt.turn === orientation[0]) {
-                alert("wrong move!");
+                alert('wrong move!')
             }
-            
         })
-
 
         // Cleanup socket listeners on unmount
         return () => {
@@ -508,27 +545,29 @@ export default function Game({ players, room, orientation, cleanup }) {
     }, [players, chess, gameState.over, orientation])
 
     return (
-        <div className="h-full w-full bg-gray-900 text-white relative">
+        <div className="relative h-full w-full bg-gray-900 text-white">
             <button
                 onClick={handleArrowBack}
-                className="absolute top-0 left-0 m-4 text-white text-lg hover:text-purple-600 duration-1000 transition-colors"
+                className="absolute left-0 top-0 m-4 text-lg text-white transition-colors duration-1000 hover:text-purple-600"
             >
                 <FaArrowLeft />
             </button>
             {resignModal && (
-                <div className="absolute top-0 left-0 w-full h-full bg-gray-900 bg-opacity-75 flex items-center justify-center z-10">
-                    <div className="bg-gray-800 p-6 rounded-lg">
-                        <h2 className="text-white text-lg mb-4">Do you want to resign?</h2>
+                <div className="absolute left-0 top-0 z-10 flex h-full w-full items-center justify-center bg-gray-900 bg-opacity-75">
+                    <div className="rounded-lg bg-gray-800 p-6">
+                        <h2 className="mb-4 text-lg text-white">
+                            Do you want to resign?
+                        </h2>
                         <div className="flex justify-around">
                             <button
                                 onClick={handleConfirmResign}
-                                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                                className="rounded bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-700"
                             >
                                 Yes
                             </button>
                             <button
                                 onClick={handleCloseResignModal}
-                                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                                className="rounded bg-green-600 px-4 py-2 font-bold text-white hover:bg-green-700"
                             >
                                 No
                             </button>
@@ -538,31 +577,46 @@ export default function Game({ players, room, orientation, cleanup }) {
             )}
             <div className="mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 items-start gap-10 py-8 md:grid-cols-3">
-                    <div className=" h-fit col-span-2 my-auto rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-6 text-white shadow-xl">
+                    <div className=" col-span-2 my-auto h-fit rounded-lg bg-gray-800 px-6 text-white shadow-xl transition-colors duration-700 hover:bg-gray-700">
                         <div>
                             <div className="flex w-full items-center justify-between py-4">
-                                <GameUserData user={opponent} timer={timers.timer1} name={"Opponent"} />
+                                <GameUserData
+                                    user={opponent}
+                                    timer={timers.timer1}
+                                    name={'Opponent'}
+                                    isPlaying={gameState.over == "" && true}
+                                />
                             </div>
                             <div>
                                 <Chessboard
-                                    position={isPlayback === true ? fenHistory[playbackIndex] : fen}
+                                    position={
+                                        isPlayback === true
+                                            ? fenHistory[playbackIndex]
+                                            : fen
+                                    }
                                     onPieceDrop={onDrop}
                                     boardOrientation={orientation}
                                     arePiecesDraggable={true}
                                     onSquareClick={onSquareClick}
                                     customSquareStyles={customSquareStyles}
-                                    customArrowColor='#6B21A8'
+                                    customArrowColor="#6B21A8"
                                 />
                             </div>
                             <div className="flex w-full items-center justify-between py-4">
-                                <GameUserData user={user} timer={timers.timer2} name={"You"} orientation={orientation} />
+                                <GameUserData
+                                    user={user}
+                                    timer={timers.timer2}
+                                    name={'You'}
+                                    orientation={orientation}
+                                    isPlaying={gameState.over == "" && true}
+                                />
                             </div>
                         </div>
                     </div>
                     <div>
-                        <div className="text-6xl font-bold flex mb-4 items-end">
+                        <div className="mb-4 flex items-end text-6xl font-bold">
                             <img
-                                className="aspect-auto w-8 mr-2"
+                                className="mr-2 aspect-auto w-8"
                                 src="/logo192.png"
                                 alt="Logo"
                             />
@@ -570,77 +624,95 @@ export default function Game({ players, room, orientation, cleanup }) {
                             <span className="text-lg">.site</span>
                         </div>
 
-                        <div className="flex flex-col col-span-1 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-4 py-2 overflow-hidden">
-
-                            <div className='flex-grow'>
-                                <div className='flex justify-between'>
-                                    <div>
-                                        {user.walletAddress?.slice(0, 8)}... - {opponent.walletAddress?.slice(0, 8)}...
+                        <div className="col-span-1 flex flex-col overflow-hidden rounded-lg bg-gray-800 px-4 py-2 transition-colors duration-700 hover:bg-gray-700">
+                            <div className="flex-grow">
+                                <div className="flex justify-between">
+                                    <div className='flex items-center'>
+                                        {orientation === "white" ? <FaSquare className=' text-white mr-1 rounded'/> : <FaSquare className=' text-black mr-1 rounded'/>}{user.walletAddress?.slice(0, 8)}... -{' '}
+                                        {orientation === "white" ? <FaSquare className=' text-black mx-1 rounded'/> : <FaSquare className=' text-white mx-1 rounded'/>}{opponent.walletAddress?.slice(0, 8)}...
                                     </div>
 
-                                    <FaSync className=' text-white hover:text-purple-600 transition-colors duration-1000 cursor-pointer' />
-
-
+                                    <FaSync className=" cursor-pointer text-white transition-colors duration-1000 hover:text-purple-600" />
                                 </div>
-                                <div>
-                                    Elo changes: {userEloChangeWritable}
-                                </div>
+                                <div>Elo changes: {userEloChangeWritable}</div>
                             </div>
-                            <div className="flex-grow overflow-auto bg-gray-900 rounded-lg px-4 py-8">
-                                <GameHistoryBox chess={chess} fenHistory={fenHistory} setIsPlayback={setIsPlayback} setPlaybackIndex={setPlaybackIndex} />
+                            <div className="flex-grow overflow-auto rounded-lg bg-gray-900 px-4 py-8">
+                                <GameHistoryBox
+                                    chess={chess}
+                                    fenHistory={fenHistory}
+                                    setIsPlayback={setIsPlayback}
+                                    setPlaybackIndex={setPlaybackIndex}
+                                />
                             </div>
-                            <div className="flex justify-between mt-4 space-x-2 text-xs">
+                            <div className="mt-4 flex justify-between space-x-2 text-xs">
                                 {gameState.over ? (
-                                    <div className="text-center text-xs font-bold py-2 px-4 rounded bg-gray-600 flex-grow">
+                                    <div className="flex-grow rounded bg-gray-600 px-4 py-2 text-center text-xs font-bold">
                                         {gameState.over}
                                     </div>
                                 ) : (
                                     <>
-                                        <button onClick={handleResign} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
+                                        <button
+                                            onClick={handleResign}
+                                            className="flex flex-grow items-center justify-center space-x-2 rounded bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-700"
+                                        >
                                             <FaFlag /> <span>Resign</span>
                                         </button>
                                         {gameState.drawOffered ? (
                                             <>
-                                                <button onClick={handleAcceptDraw} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
+                                                <button
+                                                    onClick={handleAcceptDraw}
+                                                    className="flex flex-grow items-center justify-center space-x-2 rounded bg-green-600 px-4 py-2 font-bold text-white hover:bg-green-700"
+                                                >
                                                     <FaCheck />
                                                 </button>
-                                                <button onClick={handleDeclineDraw} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
+                                                <button
+                                                    onClick={handleDeclineDraw}
+                                                    className="flex flex-grow items-center justify-center space-x-2 rounded bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-700"
+                                                >
                                                     <FaTimes />
                                                 </button>
                                             </>
                                         ) : (
-                                            <button onClick={handleOfferDraw} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
-                                                <FaHandshake /> <span>Offer Draw</span>
+                                            <button
+                                                onClick={handleOfferDraw}
+                                                className="flex flex-grow items-center justify-center space-x-2 rounded bg-yellow-600 px-4 py-2 font-bold text-white hover:bg-yellow-700"
+                                            >
+                                                <FaHandshake />{' '}
+                                                <span>Offer Draw</span>
                                             </button>
                                         )}
                                     </>
                                 )}
-                                <button onClick={handleReportCheating} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center space-x-2 flex-grow">
-                                    <FaExclamationTriangle /> <span>Report</span>
+                                <button
+                                    onClick={handleReportCheating}
+                                    className="flex flex-grow items-center justify-center space-x-2 rounded bg-blue-600 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                                >
+                                    <FaExclamationTriangle />{' '}
+                                    <span>Report</span>
                                 </button>
                             </div>
-                            <div className="flex justify-between mt-4 space-x-2 text-xs">
+                            <div className="mt-4 flex justify-between space-x-2 text-xs">
                                 {gameState.over && (
                                     <>
-
-                                        <button onClick={handleNewGame} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex-grow">
+                                        <button
+                                            onClick={handleNewGame}
+                                            className="flex-grow rounded bg-blue-600 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                                        >
                                             New Game
                                         </button>
-                                        <button onClick={handleHome} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex-grow">
+                                        <button
+                                            onClick={handleHome}
+                                            className="flex-grow rounded bg-blue-600 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                                        >
                                             Home
                                         </button>
                                     </>
-
                                 )}
-
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     )
-
 }

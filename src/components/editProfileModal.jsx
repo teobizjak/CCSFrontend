@@ -35,7 +35,7 @@ const EditProfileModal = ({ isEditOpen, setIsEditOpen, user, setUser, axios, pub
       ...userData
     }));
     console.dir(userData)
-    const token = localStorage.getItem('token'); // get the token from localStorage
+    const token = localStorage.getItem(`token-${publicKey.toString()}`)
     axios.put(`/user/${publicKey}`, userData, {headers: {
         'Authorization': `Bearer ${token}` // pass the token in the Authorization header
       }})

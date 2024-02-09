@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { useWallet } from '@solana/wallet-adapter-react'
 import ProfilePhoto from './profilePhoto'
-import { FaCheck, FaCross, FaExclamation, FaTimes } from 'react-icons/fa'
+import { FaCheck, FaCross, FaEraser, FaExclamation, FaTimes } from 'react-icons/fa'
 import AuthorizationModal from './authorizationModal'
 import axios from 'axios'
 import { Connection, clusterApiUrl } from '@solana/web3.js'
@@ -16,8 +16,12 @@ const Navbar = () => {
     const navigate = useNavigate()
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isTokenValid, setIsTokenValid] = useState(false);
-    axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION
+    axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION;
 
+    function clearStorageWallet() {
+      localStorage.removeItem('walletName')
+      window.location.reload()
+  }
     const generateAndSignToken = async () => {
       setIsAuthModalOpen(true);
       if (!publicKey || !signMessage) return
@@ -159,6 +163,7 @@ const Navbar = () => {
                                 className="w-6 flex-shrink-0 shadow-lg"
                                 src="/logo192.png"
                                 alt="Logo"
+                                onClick={()=>{navigate("/");}}
                             />
                         </div>
                         <div className="hidden md:block">
@@ -168,7 +173,13 @@ const Navbar = () => {
                                 { isTokenValid && <><NavLink to="/profile">Profile</NavLink>
                                 <NavLink to="/play">Play</NavLink></>}
                                 <WalletMultiButton />
-                                {isTokenValid ? <div
+                                {!publicKey ? <div
+                                    className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-purple-700 p-1"
+                                    onClick={clearStorageWallet}
+                                >
+                                    {/* Apply text-white to the icon itself to make the exclamation mark white */}
+                                    <FaEraser className="text-white" />
+                                </div> :isTokenValid ? <div
                                     className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-purple-700 p-1"
                                     onClick={generateAndSignToken}
                                 >

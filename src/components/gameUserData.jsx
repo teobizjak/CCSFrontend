@@ -2,8 +2,9 @@ import React, { useCallback } from 'react'
 import UserTitleBox from './userTitleBox'
 import ProfilePhoto from './profilePhoto'
 import { BorderColorClass } from '../functions/borderColorClass'
+import { useNavigate } from 'react-router-dom'
 
-function GameUserData({ user, timer, name }) {
+function GameUserData({ user, timer, name, isPlaying=false }) {
     const formatTime = useCallback((time) => {
         const minutes = Math.floor(time / 60)
         const seconds = time % 60
@@ -11,7 +12,7 @@ function GameUserData({ user, timer, name }) {
             .toString()
             .padStart(2, '0')}`
     }, [])
-    
+    const navigate = useNavigate();
     return (
         <>
             <>
@@ -25,9 +26,12 @@ function GameUserData({ user, timer, name }) {
       />
     </div>
     <span className='relative'>
+      <span className='cursor-pointer hover:text-purple-500 transition duration-700' onClick={()=>{ isPlaying === false && navigate(`/profile/${user.walletAddress}`)}}>
       {user.firstName || user.lastName
         ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
         : user.walletAddress.slice(0,8) + "..."}
+      </span>
+      
       {"(" + user.elo + ")"}
       <UserTitleBox user={user} />
     </span>

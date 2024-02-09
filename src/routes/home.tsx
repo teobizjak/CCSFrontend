@@ -188,7 +188,7 @@ function Home() {
           <main className="col-span-2 space-y-8">
             <div className="mb-4">
             <div className="flex justify-center">
-              <button className="bg-purple-600 hover:bg-purple-700 py-4 px-8 focus:outline-none shadow-xl focus:ring focus:ring-blue-300 text-white font-semibold rounded-lg  transition duration-150 ease-in-out">
+              <button className="bg-purple-600 hover:bg-purple-700 py-4 px-8 focus:outline-none shadow-xl focus:ring focus:ring-blue-300 text-white font-semibold rounded-lg  transition duration-150 ease-in-out" onClick={(()=>{navigate("/play")})}>
                 Play
               </button>
               </div>
