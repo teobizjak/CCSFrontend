@@ -521,15 +521,28 @@ export default function Game({ players, room, orientation, cleanup }) {
             interval = setInterval(() => {
                 setTimers((prevTimers) => {
                     const newTimers = { ...prevTimers }
-
                     // Decrement timer1 if it's the opponent's turn, else decrement timer2
                     if (
                         (chess.turn() === 'w' && orientation !== 'white') ||
                         (chess.turn() === 'b' && orientation !== 'black')
                     ) {
                         newTimers.timer1--
+                        if (newTimers.timer1 <= 0) {
+                            const data = {
+                                room: room,
+                                orientation:orientation
+                            }
+                            socket.emit('claimWinOnTime', data)
+                        }
                     } else {
                         newTimers.timer2--
+                        if (newTimers.timer2 <= 0) {
+                            const data = {
+                                room: room,
+                                orientation:orientation === "white" ? "black" : "white"
+                            }
+                            socket.emit('claimWinOnTime', data)
+                        }
                     }
 
                     return newTimers

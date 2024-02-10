@@ -32,12 +32,12 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
             lamports: LAMPORTS_PER_SOL * bet,
           })
         );
-          try {
-            if (true) {
-              joinGame(0.01, "asdf");
-            }else{
+        if (true) {
+          joinGame(bet, "empty");
+        }else{
 
-            
+        
+          try {
             setInitMessage("Awaiting payment...");
             const hash = await sendTransaction(transaction, connection);
             setInitMessage("Payment success...");
@@ -49,17 +49,17 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
             if (signatureStatus){
               setInitMessage("Joining game...");
               console.log("Transaction successful, executing joinOrCreate");
-              joinGame(bet, txId); // Call joinOrCreate after successful transaction
+              joinGame(bet, hash); // Call joinOrCreate after successful transaction
             }else{
               navigate("/play");
             }
-          }
             
           } catch (error) {
             console.log("Transaction failed:", error);
             // Redirect to /play page
             navigate("/play");
           }
+        }
         
       }
     };
@@ -89,34 +89,12 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
       
     })
   }
-  function joinOrCreate(betAmount) {
-    const token = localStorage.getItem(`token-${publicKey.toString()}`);
-    const data = {bet: betAmount, wallet: publicKey, token}
-    socket.emit("askForRooms", data , (r) => {
-      if (r !== "null") {
-        socket.emit("joinRoom", { roomId: r, publicKey, token }, (r) => {
-          // r is the response from the server
-          if (r.error) return setRoomError(r.message); // if an error is returned in the response set roomError to the error message and exit
-          console.log("response:", r);
-          setRoom(r?.roomId); // set room to the room ID
-          setPlayers(r?.players); // set players array to the array of players in the room
-          setOrientation("black"); // set orientation as black
-        });
-      }else{
-      let data = {publicKey, betAmount, token}
-      socket.emit("createRoom", data ,(r) => {
-        console.log(r);
-        setRoom(r);
-        setOrientation("white");
-        console.log("emitting create a room with data:");
-        console.log(JSON.stringify(r));
-        
-        
-      });
-    }
-  });
-  }
+  
   return (
-    <div>{initMessage && initMessage}</div>
+    <div className="spinner-container">
+      <div className="spinner"></div>
+      {initMessage && <div className="init-message">{initMessage}</div>}
+    </div>
+
   );
 }
