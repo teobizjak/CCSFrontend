@@ -109,17 +109,7 @@ function UserProfile() {
                 console.error('Error:', error)
             })
     }, [limit, publicKey])
-    useEffect(() => {
-        if (publicKey) {
-            socket.emit('updateUserToken', publicKey, (r) => {
-                console.log(r)
-                localStorage.setItem('token', r)
-                console.log('token is')
-
-                console.log(localStorage.getItem('token'))
-            })
-        }
-    }, [])
+    
     useEffect(() => {
         let str = ''
         games.map((game, index) => {
