@@ -20,11 +20,12 @@ const DisplaySearchedUserComponent = ({ user, style }) => {
       onClick={() => navigateToProfile(user.walletAddress)}
     >
       <div className="flex flex-col md:flex-row justify-between items-center">
-        <h3 className={`text-lg md:text-xl font-semibold text-white ${!user.firstName && !user.lastName ? 'mb-2 md:mb-0' : ''}`}>
+        <h3 className={`text-lg md:text-xl font-semibold text-white truncate ${!user.firstName && !user.lastName ? 'mb-2 md:mb-0' : ''}`} style={{ maxWidth: '100px' }}>
           {userName || 'Unknown User'}
         </h3>
-        <span className="bg-purple-600 text-white text-sm md:text-md font-medium px-3 py-1 rounded-full">ELO: {user.elo || 'N/A'}</span>
+        <span className="bg-purple-600 text-white text-sm md:text-md font-medium px-3 py-1 rounded-full whitespace-nowrap">ELO: {user.elo || 'N/A'}</span>
       </div>
+
       <p className="text-gray-400 mt-2">
         <i className="fas fa-wallet mr-2"></i> {/* Ensure you have FontAwesome or another icon library integrated */}
         <span className="font-medium text-indigo-400">Address:</span> {user.walletAddress.slice(0, 12)}...

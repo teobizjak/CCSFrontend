@@ -11,6 +11,8 @@ import FeaturedPlayers from "../components/featuredPlayers";
 import RecentActivity from "../components/recentActivity";
 import Forum from "../components/forum";
 import QuestionList from "../components/questionList";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useAuth } from "../middleware/authContext";
 
 const recentActivities = [
   {
@@ -54,6 +56,8 @@ function Home() {
   const [isUserStatsNull, setIsUserStatsNull] = useState(true);
   const [games, setGames] = useState([]);
   const [userData, setUserData] = useState<UserData>({});
+  const [isToken, setIsToken] = useState(false);
+  const { isTokenValid } = useAuth();
 
   function loadMore() {
     setLimit(limit + 5)
@@ -112,8 +116,49 @@ function Home() {
 
       setUserData(data);
     }
+    const verifyToken = async (token) => {
+      try {
+          const response = await axios.post('/verify-token', {
+              token,
+              publicKey: publicKey.toString(),
+          })
+          return response.data.valid
+      } catch (error) {
+          console.error('Token verification failed:', error)
+          return false
+      }
+  }
+
+  
+
+  const checkAndHandleToken = async () => {
+          console.log('public key:', publicKey.toBase58())
+          const token = localStorage.getItem(`token-${publicKey.toString()}`)
+          console.log('token in ls:', token)
+
+          if (!token) {
+              // No token found, generate a new one
+              setIsToken(false)
+          } else {
+              // Token found, verify it
+              
+              const isValid = await verifyToken(token)
+              if (!isValid) {
+                  console.log('token not valid')
+
+                  // Token is invalid, generate a new one
+                  setIsToken(false)
+              }else{
+                setIsToken(true);
+                console.log("token is valid");
+                
+              }
+              // If the token is valid, do nothing
+          }
+  }
     if (publicKey) {
-      fetchUserData()
+      checkAndHandleToken();
+      fetchUserData();
       
     }else{
       setIsUserStatsNull(true);
@@ -149,6 +194,8 @@ function Home() {
     fetchData();
 
   }, [limit, publicKey]);
+
+
 
   // Handle the click event of the play button
   const handlePlay = () => {
@@ -188,9 +235,13 @@ function Home() {
           <main className="col-span-2 space-y-8">
             <div className="mb-4">
             <div className="flex justify-center">
+              {isTokenValid == true ? 
               <button className="bg-purple-600 hover:bg-purple-700 py-4 px-8 focus:outline-none shadow-xl focus:ring focus:ring-blue-300 text-white font-semibold rounded-lg  transition duration-150 ease-in-out" onClick={(()=>{navigate("/play")})}>
                 Play
               </button>
+              : publicKey ? <button className="bg-purple-600 hover:bg-purple-700 py-4 px-8 focus:outline-none shadow-xl focus:ring focus:ring-blue-300 text-white font-semibold rounded-lg  transition duration-150 ease-in-out">
+              Authorize token
+            </button>: <WalletMultiButton/>}
               </div>
             </div>
             <CurrentlyPlayedGames />

@@ -1,10 +1,10 @@
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    RouterProvider,
-    Route,
-  } from "react-router-dom";
-  import {createRoot} from 'react-dom/client';
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+  Route,
+} from "react-router-dom";
+import { createRoot } from 'react-dom/client';
 import { ConnectionProvider, useWallet, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletMultiButton, WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter, TorusWalletAdapter, SolongWalletAdapter } from '@solana/wallet-adapter-wallets';
@@ -27,77 +27,80 @@ import UserProfile from "./routes/userProfile";
 import FakeNavbar from "./components/FakeNavbar";
 import Explore from "./routes/explore";
 import WatchGame from "./routes/watchGame";
+import { AuthProvider } from "./middleware/authContext";
 
 const App = () => {
-    const network = WalletAdapterNetwork.Devnet;
-    const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-    const wallets = useMemo(() => [
-        new PhantomWalletAdapter(),
-        new TorusWalletAdapter(),
-        new SolongWalletAdapter(),
-    ], [network]);
+  const network = WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const wallets = useMemo(() => [
+    new PhantomWalletAdapter(),
+    new TorusWalletAdapter(),
+    new SolongWalletAdapter(),
+  ], [network]);
 
-    const router = createBrowserRouter([{
-        path: "/",
-        element: <Root/>,
-        errorElement: <ErrorPage />,
-      },
-    {
-      path: "/home",
-        element: <> <Navbar/> <Home /></>,
-        errorElement: <ErrorPage />,
-    },
-    {
-      path: "/explore",
-        element: <> <Navbar/> <Explore /></>,
-        errorElement: <ErrorPage />,
-    },
-    {
-      path: "/play",
-        element: <> <Navbar/> <Play /></>,
-        errorElement: <ErrorPage />,
-    },
-    {
-      path: "/game/",
-      element: <> <GamePage /></>,
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/watch/:roomId",
-      element: <> <Navbar/><WatchGame /></>,
-      errorElement: <ErrorPage />,
-      },
-    {
-      path: "/analyzeGame/:gameId",
-      element: <> <FakeNavbar/><AnalyzeGame /></>,
-      errorElement: <ErrorPage />,
-      },
-    {
+  const router = createBrowserRouter([{
+    path: "/",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/home",
+    element: <> <Navbar /> <Home /></>,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/explore",
+    element: <> <Navbar /> <Explore /></>,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/play",
+    element: <> <Navbar /> <Play /></>,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/game/",
+    element: <> <GamePage /></>,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/watch/:roomId",
+    element: <> <Navbar /><WatchGame /></>,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/analyzeGame/:gameId",
+    element: <> <Navbar /><AnalyzeGame /></>,
+    errorElement: <ErrorPage />,
+  },
+  {
     path: "/profile",
-    element: <> <Navbar/> <Profile /></>,
+    element: <> <Navbar /> <Profile /></>,
     errorElement: <ErrorPage />,
-    },
-    {
-      path: "/profile/:publicKey",
-      element: <> <FakeNavbar/> <UserProfile /></>,
-      errorElement: <ErrorPage />,
-      },
-    {
+  },
+  {
+    path: "/profile/:publicKey",
+    element: <> <Navbar /> <UserProfile /></>,
+    errorElement: <ErrorPage />,
+  },
+  {
     path: "/rewards",
-    element: <> <Navbar/> <Rewards /></>,
+    element: <> <Navbar /> <Rewards /></>,
     errorElement: <ErrorPage />,
-    }]);
+  }]);
 
-    return (
-      
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} autoConnect>
-            <WalletModalProvider>
-                <RouterProvider router={router} />  
-            </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
-    );
+  return (
+
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
+  );
 };
 export default App;
 

@@ -5,83 +5,119 @@ import { useNavigate } from 'react-router-dom'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { useWallet } from '@solana/wallet-adapter-react'
 import ProfilePhoto from './profilePhoto'
-import { FaCheck, FaCross, FaEraser, FaExclamation, FaTimes } from 'react-icons/fa'
+import {
+    FaCheck,
+    FaCross,
+    FaEraser,
+    FaExclamation,
+    FaTimes,
+} from 'react-icons/fa'
 import AuthorizationModal from './authorizationModal'
 import axios from 'axios'
 import { Connection, clusterApiUrl } from '@solana/web3.js'
+import { useAuth } from '../middleware/authContext'
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false)
     const { connected, publicKey, signMessage } = useWallet()
     const navigate = useNavigate()
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [isTokenValid, setIsTokenValid] = useState(false);
-    axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION;
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+    const { isTokenValid, setIsTokenValid } = useAuth();
+    axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION
 
     function clearStorageWallet() {
-      localStorage.removeItem('walletName')
-      window.location.reload()
-  }
+        localStorage.removeItem('walletName')
+        window.location.reload()
+    }
+    function setWithExpiry(key, value, ttl) {
+        const now = new Date()
+
+        const item = {
+            value: value,
+            expiry: now.getTime() + ttl,
+        }
+
+        localStorage.setItem(key, JSON.stringify(item))
+    }
+    function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        // If the item doesn't exist, return null
+        if (!itemStr) {
+            return null
+        }
+
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        // Compare the expiry time of the item with the current time
+        if (now.getTime() > item.expiry) {
+            // If the item is expired, delete the item from storage
+            // and return null
+            localStorage.removeItem(key)
+            return null
+        }
+
+        return item.value
+    }
+
     const generateAndSignToken = async () => {
-      setIsAuthModalOpen(true);
-      if (!publicKey || !signMessage) return
+        setIsAuthModalOpen(true)
+        if (!publicKey || !signMessage) return
 
-      try {
-          // Step 1: Generate a message or token
-          const array = new Uint8Array(10);
-          
-          const nonce = crypto.getRandomValues(array).toString();
-          const message = `Please sign this message to authenticate. Nonce: ${nonce}`;
-          console.log("message is ", message);
-          
-          const encodedMessage = new TextEncoder().encode(message)
+        try {
+            // Step 1: Generate a message or token
+            const array = new Uint8Array(10)
 
-          // Step 2: Use the wallet to sign the message
-          const signature = await signMessage(encodedMessage)
+            const nonce = crypto.getRandomValues(array).toString()
+            const message = `Please sign this message to authenticate. Nonce: ${nonce}`
+            console.log('message is ', message)
 
-          // Step 3: Send the signed message to the server
-          axios
-              .post('/verify-signature', {
-                  signature: Array.from(signature), // Convert the signature to a normal array for JSON serialization
-                  publicKey: publicKey.toString(),
-                  message: message // Convert the public key to a string
-              })
-              .then((response) => {
-                  // Check if the server responded with valid: true
-                  if (response.data.valid) {
-                    setIsAuthModalOpen(false);
-                    setIsTokenValid(true);
-                      // Save the signature in local storage associated with the wallet address
-                      localStorage.setItem(
-                          `token-${publicKey.toString()}`,
-                          btoa(String.fromCharCode(...signature))
-                      )
+            const encodedMessage = new TextEncoder().encode(message)
 
-                      console.log(
-                          'Signature is valid and saved in local storage.'
-                      )
-                  } else {
-                      console.error(
-                          'Signature is invalid according to the server.'
-                      )
-                  }
-                  
-              })
-              .catch((error) => {
-                  console.error('Error during verification:', error)
-              })
+            // Step 2: Use the wallet to sign the message
+            const signature = await signMessage(encodedMessage)
 
-          // Optionally handle the server response, such as saving the token to localStorage
-          
-      } catch (error) {
-          console.error('Error during signing:', error)
-      }
-  }
+            // Step 3: Send the signed message to the server
+            axios
+                .post('/verify-signature', {
+                    signature: Array.from(signature), // Convert the signature to a normal array for JSON serialization
+                    publicKey: publicKey.toString(),
+                    message: message, // Convert the public key to a string
+                })
+                .then((response) => {
+                    // Check if the server responded with valid: true
+                    if (response.data.valid) {
+                        setIsAuthModalOpen(false)
+                        setIsTokenValid(true)
+                        // Save the signature in local storage associated with the wallet address
+                        localStorage.setItem(
+                            `token-${publicKey.toString()}`,
+                            btoa(String.fromCharCode(...signature))
+                        )
+
+                        console.log(
+                            'Signature is valid and saved in local storage.'
+                        )
+                    } else {
+                        console.error(
+                            'Signature is invalid according to the server.'
+                        )
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error during verification:', error)
+                })
+
+            // Optionally handle the server response, such as saving the token to localStorage
+        } catch (error) {
+            console.error('Error during signing:', error)
+        }
+    }
 
     useEffect(() => {
-
         // Function to verify the token
-        
+
         const verifyToken = async (token) => {
             try {
                 const response = await axios.post('/verify-token', {
@@ -95,31 +131,36 @@ const Navbar = () => {
             }
         }
 
-        
-
         const checkAndHandleToken = async () => {
             if (publicKey) {
                 console.log('public key:', publicKey.toBase58())
 
-                const token = localStorage.getItem(`token-${publicKey.toString()}`)
+                const token = localStorage.getItem(
+                    `token-${publicKey.toString()}`
+                )
                 console.log('token in ls:', token)
 
                 if (!token) {
                     // No token found, generate a new one
-                    await generateAndSignToken()
+                    if (!getWithExpiry('isAuthorizationOffered')) {
+                        setWithExpiry('isAuthorizationOffered', true, 3600000) // 3600000 milliseconds = 1 hour
+                        await generateAndSignToken()
+                    }
                 } else {
                     // Token found, verify it
-                    
+
                     const isValid = await verifyToken(token)
                     if (!isValid) {
                         console.log('token not valid')
 
                         // Token is invalid, generate a new one
-                        await generateAndSignToken()
-                    }else{
-                      setIsTokenValid(true);
-                      console.log("token is valid");
-                      
+                        if (!getWithExpiry('isAuthorizationOffered')) {
+                            setWithExpiry('isAuthorizationOffered', true, 3600000) // 3600000 milliseconds = 1 hour
+                            await generateAndSignToken()
+                        }
+                    } else {
+                        setIsTokenValid(true)
+                        console.log('token is valid')
                     }
                     // If the token is valid, do nothing
                 }
@@ -163,36 +204,47 @@ const Navbar = () => {
                                 className="w-6 flex-shrink-0 shadow-lg"
                                 src="/logo192.png"
                                 alt="Logo"
-                                onClick={()=>{navigate("/");}}
+                                onClick={() => {
+                                    navigate('/')
+                                }}
                             />
                         </div>
                         <div className="hidden md:block">
                             <div className="ml-10 flex items-center space-x-4">
                                 <NavLink to="/home">Home</NavLink>
                                 <NavLink to="/explore">Explore</NavLink>
-                                { isTokenValid && <><NavLink to="/profile">Profile</NavLink>
-                                <NavLink to="/play">Play</NavLink></>}
+                                {isTokenValid && (
+                                    <>
+                                        <NavLink to="/profile">Profile</NavLink>
+                                        <NavLink to="/play">Play</NavLink>
+                                    </>
+                                )}
                                 <WalletMultiButton />
-                                {!publicKey ? <div
-                                    className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-purple-700 p-1"
-                                    onClick={clearStorageWallet}
-                                >
-                                    {/* Apply text-white to the icon itself to make the exclamation mark white */}
-                                    <FaEraser className="text-white" />
-                                </div> :isTokenValid ? <div
-                                    className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-purple-700 p-1"
-                                    onClick={generateAndSignToken}
-                                >
-                                    {/* Apply text-white to the icon itself to make the exclamation mark white */}
-                                    <FaCheck className="text-white" />
-                                </div> :<div
-                                    className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-red-500 p-1"
-                                    onClick={generateAndSignToken}
-                                >
-                                    {/* Apply text-white to the icon itself to make the exclamation mark white */}
-                                    <FaExclamation className="text-white" />
-                                </div>}
-                                
+                                {!publicKey ? (
+                                    <div
+                                        className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-purple-700 p-1"
+                                        onClick={clearStorageWallet}
+                                    >
+                                        {/* Apply text-white to the icon itself to make the exclamation mark white */}
+                                        <FaEraser className="text-white" />
+                                    </div>
+                                ) : isTokenValid ? (
+                                    <div
+                                        className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-purple-700 p-1"
+                                        onClick={generateAndSignToken}
+                                    >
+                                        {/* Apply text-white to the icon itself to make the exclamation mark white */}
+                                        <FaCheck className="text-white" />
+                                    </div>
+                                ) : (
+                                    <div
+                                        className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-red-500 p-1"
+                                        onClick={generateAndSignToken}
+                                    >
+                                        {/* Apply text-white to the icon itself to make the exclamation mark white */}
+                                        <FaExclamation className="text-white" />
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="-mr-2 flex md:hidden">
