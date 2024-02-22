@@ -227,42 +227,37 @@ function Home() {
 
   return (
     <div className="h-full w-full bg-gray-900">
-      <div className="relative mx-auto min-h-screen max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <header className="mb-12 text-3xl font-bold text-purple-300">
-          Welcome, {publicKey ? publicKey.toBase58().slice(0, 8) + "... " : "please connect solana wallet... "}!
-        </header>
-        <div className="grid gap-8 text-white md:grid-cols-3">
-          <main className="col-span-2 space-y-8">
-            <div className="mb-4">
-            <div className="flex justify-center">
-              {isTokenValid == true ? 
-              <button className="bg-purple-600 hover:bg-purple-700 py-4 px-8 focus:outline-none shadow-xl focus:ring focus:ring-blue-300 text-white font-semibold rounded-lg  transition duration-150 ease-in-out" onClick={(()=>{navigate("/play")})}>
-                Play
-              </button>
-              : publicKey ? <button className="bg-purple-600 hover:bg-purple-700 py-4 px-8 focus:outline-none shadow-xl focus:ring focus:ring-blue-300 text-white font-semibold rounded-lg  transition duration-150 ease-in-out">
-              Authorize token
-            </button>: <WalletMultiButton/>}
-              </div>
-            </div>
-            <CurrentlyPlayedGames />
-            <QuestionList />
-            <Forum />
-          </main>
-          <aside className="col-span-1 space-y-8">
-            <UserStats user={userData} streak={streak} isUserDataNull={isUserStatsNull} />
-            <FeaturedPlayers />
-            <RecentActivity activities={recentActivities} />
-            <div>
-              {/* Hall of Shame */}
-              <p>Hall of Shame...</p>
-            </div>
-
-          </aside>
+  <div className="relative mx-auto min-h-screen max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <header className="mb-12 text-3xl font-bold text-purple-300">
+      Welcome, {publicKey ? publicKey.toBase58().slice(0, 8) + "... " : "please connect solana wallet... "}!
+    </header>
+    <div className="grid gap-8 text-white sm:grid-cols-1 md:grid-cols-3">
+      <aside className="space-y-8 col-span-1 order-2">
+        <div className=" sm:flex sm:justify-around md:block">
+        <UserStats user={userData} streak={streak} isUserDataNull={isUserStatsNull} />
+        <FeaturedPlayers />
         </div>
-
-
-      </div>
+      </aside>
+      <main className="md:col-span-2 sm:col-span-1 space-y-8 order-3 w-auto">
+        <div className="mb-4">
+          <div className="flex justify-center">
+            {isTokenValid == true ? 
+            <button className="bg-purple-600 hover:bg-purple-700 py-4 px-8 focus:outline-none shadow-xl focus:ring focus:ring-blue-300 text-white font-semibold rounded-lg  transition duration-150 ease-in-out" onClick={(()=>{navigate("/play")})}>
+              Play
+            </button>
+            : publicKey ? <button className="bg-purple-600 hover:bg-purple-700 py-4 px-8 focus:outline-none shadow-xl focus:ring focus:ring-blue-300 text-white font-semibold rounded-lg  transition duration-150 ease-in-out">
+            Authorize token
+          </button>: <WalletMultiButton/>}
+          </div>
+        </div>
+        <CurrentlyPlayedGames />
+        <QuestionList />
+        <Forum />
+      </main>
     </div>
+  </div>
+</div>
+
   );
 }
 

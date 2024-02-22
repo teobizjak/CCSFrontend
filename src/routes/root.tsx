@@ -40,28 +40,28 @@ function Root() {
             <div className="absolute h-full w-full bg-black bg-opacity-90"></div>
             <div className="z-10 max-w-2xl space-y-6 px-4 py-6 text-center text-white">
                 {/* Main heading with increased prominence */}
-                <h1 className="text-8xl font-extrabold text-purple-600">
-                    Play Chess. Earn Solana.
-                </h1>
+                <h1 className="text-4xl md:text-6xl lg:text-8xl font-extrabold text-purple-600">
+    Play Chess. Earn Solana.
+</h1>
+
                 {/* Subheadings with adjusted font size and color for hierarchy */}
-                <h2 className="text-2xl text-gray-200">
+                <h2 className="text-lg md:text-xl lg:text-2xl text-gray-200">
                     The ultimate platform for chess lovers and crypto
                     enthusiasts.
                 </h2>
-                <p className="text-lg text-gray-300">
+                <p className=" text-base md:text-lg lg:text-xl text-gray-300">
                     Join the fastest and most secure blockchain network. Play
                     with global players and earn SOL tokens for every win.
                 </p>
                 {/* Improved button visibility and interactive feedback */}
                 <div className="mt-4 flex items-center justify-center space-x-4">
                 <button
-                    onClick={() => {
-                        navigate('/home')
-                    }}
-                    className="mt-4 transform rounded-lg bg-gradient-to-r from-purple-600 to-purple-800 px-8 py-4 font-bold text-white shadow transition-all duration-300 ease-in-out hover:scale-110 hover:from-purple-800 hover:to-purple-600"
-                >
-                    Play Now
-                </button>
+    onClick={() => navigate('/home')}
+    className="mt-4 transform rounded-lg bg-gradient-to-r from-purple-600 to-purple-800 px-4 py-2 md:px-8 md:py-4 font-bold text-white shadow transition-all duration-300 ease-in-out hover:scale-110 hover:from-purple-800 hover:to-purple-600"
+>
+    Play Now
+</button>
+
                     {/* Secondary button with improved visibility */}
                 </div>
                 {/* Call to action button with gradient and animation to draw attention */}

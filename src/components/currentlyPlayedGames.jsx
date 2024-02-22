@@ -21,21 +21,23 @@ const CurrentlyPlayedGames = () => {
     centerPadding: '50px', // Adjust this value as needed
     responsive: [
       {
-        breakpoint: 1024,
+        breakpoint: 1024, // Tailwind's lg breakpoint
         settings: {
           slidesToShow: games.length > 1 ? 2 : 1,
           slidesToScroll: 1,
         },
       },
       {
-        breakpoint: 600,
+        breakpoint: 768, // Tailwind's sm breakpoint
         settings: {
-          slidesToShow: 1,
+          slidesToShow: 1, // Show only one slide on sm screens and below
           slidesToScroll: 1,
         },
       },
+      
     ],
-  };
+};
+
   
 
   function watchGame(gameId) {
@@ -63,7 +65,7 @@ const CurrentlyPlayedGames = () => {
   return (
     <>
       
-        <div className='p-4'>
+        <div className='p-4 w-full md:w-auto'>
         <h2 className="text-xl font-semibold mb-4 text-purple-400">Live Games</h2>
       {games.length < 1 ? (
         <p className="text-white">No games are being played currently.</p>
@@ -91,6 +93,7 @@ const CurrentlyPlayedGames = () => {
           </div>
         </div>
       ) : (
+        <div className=' max-w-96 md:max-w-full mx-auto'>
         <Slider {...settings}>
         {games.map((game) => (
           <div key={game.roomId} className={`p-4`}>
@@ -117,6 +120,7 @@ const CurrentlyPlayedGames = () => {
           </div>
         ))}
       </Slider>
+      </div>
       
         )}
         </div>

@@ -44,6 +44,9 @@ export default function Game({ players, room, orientation, cleanup }) {
     const [fen, setFen] = useState(chess.fen())
     const [isPlayback, setIsPlayback] = useState(false)
     const [resignModal, setResignModal] = useState(false)
+    const [showPromotionDialog, setShowPromotionDialog] = useState(false)
+    const [promotionFrom, setPromotionFrom] = useState(null)
+    const [promotionTo, setPromotionTo] = useState(null)
     const [token, setToken] = useState('none')
     const [playbackIndex, setPlaybackIndex] = useState(0)
     const [gameState, setGameState] = useState({
@@ -73,6 +76,7 @@ export default function Game({ players, room, orientation, cleanup }) {
         blackWin: { white: '0', black: '0' },
         draw: { white: '0', black: '0' },
     })
+    const [promotionPiece, setPromotionPiece] = useState('q')
     const [userEloChangeWritable, setUserEloChangeWritable] = useState('0|0|0')
 
     // Utility functions
@@ -91,7 +95,6 @@ export default function Game({ players, room, orientation, cleanup }) {
             .toString()
             .padStart(2, '0')}`
     }, [])
-
     const makeAMove = useCallback(
         (move, fromOpponent = false) => {
             if (isPlayback && !fromOpponent) {
@@ -196,12 +199,18 @@ export default function Game({ players, room, orientation, cleanup }) {
     }, [])
 
     const handleOfferDraw = useCallback(() => {
-        socket.emit('offerDraw', { roomId: room, token: localStorage.getItem(`token-${publicKey.toString()}`)})
+        socket.emit('offerDraw', {
+            roomId: room,
+            token: localStorage.getItem(`token-${publicKey.toString()}`),
+        })
         setGameState((prevState) => ({ ...prevState, offerDraw: true }))
     }, [room])
 
     const handleAcceptDraw = useCallback(() => {
-        socket.emit('acceptDraw', { roomId: room, token: localStorage.getItem(`token-${publicKey.toString()}`) })
+        socket.emit('acceptDraw', {
+            roomId: room,
+            token: localStorage.getItem(`token-${publicKey.toString()}`),
+        })
     }, [room])
 
     const handleDeclineDraw = useCallback(() => {
@@ -214,7 +223,30 @@ export default function Game({ players, room, orientation, cleanup }) {
     }, [playbackIndex, isPlayback])
 
     const onDrop = useCallback(
-        (sourceSquare, targetSquare) => {
+        (sourceSquare, targetSquare, piece) => {
+            console.log('source square', sourceSquare)
+            console.log('target square', targetSquare)
+
+            if (
+                ((piece === 'wP' &&
+                    sourceSquare[1] === '7' &&
+                    targetSquare[1] === '8') ||
+                    (piece === 'bP' &&
+                        sourceSquare[1] === '2' &&
+                        targetSquare[1] === '1')) &&
+                Math.abs(
+                    sourceSquare.charCodeAt(0) - targetSquare.charCodeAt(0)
+                ) <= 1
+            ) {
+                console.log('is promotion start drop')
+                console.log('source:', sourceSquare)
+                console.log('target:', targetSquare)
+                setPromotionFrom(sourceSquare)
+                setPromotionTo(targetSquare)
+                setShowPromotionDialog(true)
+                console.log('is promotion end drop')
+                return false
+            }
             if (chess.turn() !== orientation[0]) return false
             if (players.length < 2 || gameState.over !== '') return false
 
@@ -280,7 +312,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                         from: gameState.clickedSquare,
                         to: square,
                         color: chess.turn(),
-                        promotion: 'q',
+                        promotion: promotionPiece,
                     }
                     const move = makeAMove(moveData)
                     const user =
@@ -530,7 +562,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                         if (newTimers.timer1 <= 0) {
                             const data = {
                                 room: room,
-                                orientation:orientation
+                                orientation: orientation,
                             }
                             socket.emit('claimWinOnTime', data)
                         }
@@ -539,7 +571,8 @@ export default function Game({ players, room, orientation, cleanup }) {
                         if (newTimers.timer2 <= 0) {
                             const data = {
                                 room: room,
-                                orientation:orientation === "white" ? "black" : "white"
+                                orientation:
+                                    orientation === 'white' ? 'black' : 'white',
                             }
                             socket.emit('claimWinOnTime', data)
                         }
@@ -597,7 +630,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                                     user={opponent}
                                     timer={timers.timer1}
                                     name={'Opponent'}
-                                    isPlaying={gameState.over == "" && true}
+                                    isPlaying={gameState.over == '' && true}
                                 />
                             </div>
                             <div>
@@ -613,6 +646,70 @@ export default function Game({ players, room, orientation, cleanup }) {
                                     onSquareClick={onSquareClick}
                                     customSquareStyles={customSquareStyles}
                                     customArrowColor="#6B21A8"
+                                    showPromotionDialog={showPromotionDialog}
+                                    onPromotionCheck={(
+                                        sourceSquare,
+                                        targetSquare,
+                                        piece
+                                    ) => {
+                                        if (
+                                            ((piece === 'wP' &&
+                                                sourceSquare[1] === '7' &&
+                                                targetSquare[1] === '8') && orientation === 'white' ||
+                                                (piece === 'bP' &&
+                                                    sourceSquare[1] === '2' &&
+                                                    targetSquare[1] === '1' && orientation === 'black' )) &&
+                                            Math.abs(
+                                                sourceSquare.charCodeAt(0) -
+                                                    targetSquare.charCodeAt(0)
+                                            ) <= 1
+                                        ) {
+                                            console.log('is promotion start')
+                                            console.log('source:', sourceSquare)
+                                            console.log('target:', targetSquare)
+                                            setPromotionFrom(sourceSquare)
+                                            setPromotionTo(targetSquare)
+                                            setShowPromotionDialog(true)
+                                            console.log('is promotion end')
+                                        }
+                                    }}
+                                    onPromotionPieceSelect={(p) => {
+                                        if (p) {
+                                            const moveData = {
+                                                from: promotionFrom,
+                                                to: promotionTo,
+                                                color: chess.turn(),
+                                                promotion: p
+                                                    .slice(-1)
+                                                    .toLowerCase(),
+                                            }
+                                            console.log(
+                                                'promotion move data: ',
+                                                moveData
+                                            )
+                                            const move = makeAMove(moveData)
+                                            if (move === null || move === false)
+                                                return false
+                                            console.log(
+                                                `emitting move pk: ${publicKey}, tk: ${token}`
+                                            )
+
+                                            socket.emit('move', {
+                                                token: localStorage.getItem(
+                                                    `token-${publicKey.toString()}`
+                                                ),
+                                                publicKey,
+                                                move,
+                                                room,
+                                                user,
+                                                time: timers.timer2,
+                                            })
+
+                                            return true
+                                        } else {
+                                            return false
+                                        }
+                                    }}
                                 />
                             </div>
                             <div className="flex w-full items-center justify-between py-4">
@@ -621,7 +718,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                                     timer={timers.timer2}
                                     name={'You'}
                                     orientation={orientation}
-                                    isPlaying={gameState.over == "" && true}
+                                    isPlaying={gameState.over == '' && true}
                                 />
                             </div>
                         </div>
@@ -640,9 +737,19 @@ export default function Game({ players, room, orientation, cleanup }) {
                         <div className="col-span-1 flex flex-col overflow-hidden rounded-lg bg-gray-800 px-4 py-2 transition-colors duration-700 hover:bg-gray-700">
                             <div className="flex-grow">
                                 <div className="flex justify-between">
-                                    <div className='flex items-center'>
-                                        {orientation === "white" ? <FaSquare className=' text-white mr-1 rounded'/> : <FaSquare className=' text-black mr-1 rounded'/>}{user.walletAddress?.slice(0, 8)}... -{' '}
-                                        {orientation === "white" ? <FaSquare className=' text-black mx-1 rounded'/> : <FaSquare className=' text-white mx-1 rounded'/>}{opponent.walletAddress?.slice(0, 8)}...
+                                    <div className="flex items-center">
+                                        {orientation === 'white' ? (
+                                            <FaSquare className=" mr-1 rounded text-white" />
+                                        ) : (
+                                            <FaSquare className=" mr-1 rounded text-black" />
+                                        )}
+                                        {user.walletAddress?.slice(0, 8)}... -{' '}
+                                        {orientation === 'white' ? (
+                                            <FaSquare className=" mx-1 rounded text-black" />
+                                        ) : (
+                                            <FaSquare className=" mx-1 rounded text-white" />
+                                        )}
+                                        {opponent.walletAddress?.slice(0, 8)}...
                                     </div>
 
                                     <FaSync className=" cursor-pointer text-white transition-colors duration-1000 hover:text-purple-600" />
