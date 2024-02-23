@@ -59,11 +59,12 @@ const FinishedGames = () => {
 
   return (
     <>
-      <div className='p-4'>
+      <div className='md:p-4 w-full md:w-auto'>
         <h2 className="text-xl font-semibold mb-4 text-purple-400">Recently Finished Games</h2>
         {games.length < 1 ? (
           <p className="text-white">No finished games.</p>
         ) : (
+          <div className='max-w-xs md:max-w-full mx-auto'>
           <Slider {...settings}>
             {games.map((game) => (
               <div key={game.roomId} className="p-4">
@@ -102,6 +103,7 @@ const FinishedGames = () => {
               </div>
             ))}
           </Slider>
+          </div>
         )}
       </div>
 

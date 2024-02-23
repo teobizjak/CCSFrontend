@@ -65,7 +65,7 @@ const CurrentlyPlayedGames = () => {
   return (
     <>
       
-        <div className='p-4 w-full md:w-auto'>
+        <div className='md:p-4 w-full md:w-auto'>
         <h2 className="text-xl font-semibold mb-4 text-purple-400">Live Games</h2>
       {games.length < 1 ? (
         <p className="text-white">No games are being played currently.</p>
@@ -93,7 +93,7 @@ const CurrentlyPlayedGames = () => {
           </div>
         </div>
       ) : (
-        <div className=' max-w-96 md:max-w-full mx-auto'>
+        <div className=' max-w-xs md:max-w-full mx-auto'>
         <Slider {...settings}>
         {games.map((game) => (
           <div key={game.roomId} className={`p-4`}>

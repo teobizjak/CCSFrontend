@@ -28,7 +28,7 @@ function Root() {
         window.location.reload()
     }
     return (
-        <div className="m-0 flex min-h-screen items-center justify-center overflow-hidden p-0">
+        <div className="m-0 flex min-h-screen items-center bg-green-500 justify-center overflow-hidden p-0">
             <video
                 src={backgroundVideo}
                 autoPlay

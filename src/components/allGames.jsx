@@ -38,7 +38,7 @@ const AllGames = () => {
 
   return (
     <>
-    <div className='p-4'>
+    <div className='px-0 md:p-4'>
       <Heading>All Games</Heading>
         {/* Filter Controls */}
         <div className="mb-4">
@@ -49,14 +49,15 @@ const AllGames = () => {
         </div>
 
         {/* Games Table */}
+        <div className='overflow-x-auto'>
         <table className="w-full table-fixed text-white text-center">
           <thead>
             <tr className="bg-gray-700">
-              <th className="px-4 py-2">White Player</th>
-              <th className="px-4 py-2">Black Player</th>
+              <th className="px-4 py-2">White</th>
+              <th className="px-4 py-2">Black</th>
               <th className="px-4 py-2">Winner</th>
-              <th className="px-4 py-2">Date</th>
-              <th className="px-4 py-2">Claimed</th>
+              <th className="hidden md:table-cell px-4 py-2">Date</th>
+              <th className="hidden md:table-cell px-4 py-2">Claimed</th>
               <th className="px-4 py-2">Analyze</th>
             </tr>
           </thead>
@@ -66,8 +67,8 @@ const AllGames = () => {
                 <td className="px-4 py-2" >{game.white ? <span className="hover:text-purple-400 cursor-pointer" onClick={() => navigateToProfile(game.white)}>{game.white.slice(0, 5)  + "..." + "("+game.whiteElo+")"}</span>: "not found"}</td>
                 <td className="px-4 py-2" >{game.black ? <span className="hover:text-purple-400 cursor-pointer" onClick={() => navigateToProfile(game.black)}>{game.black.slice(0, 5)  + "..."+ "("+game.blackElo+")"}</span> : "not found"}</td>
                 <td className="px-4 py-2">{game.winner || 'In Progress'}</td>
-                <td className="px-4 py-2">{game.createdAt}</td>
-                <td className="px-4 py-2">{game.whiteTxnId ? <ClaimedLink link={game.whiteTxnId} /> : game.blackTxnId ? <ClaimedLink link={game.blackTxnId} /> : "not claimed"}</td>
+                <td className="hidden md:table-cell px-4 py-2">{game.createdAt}</td>
+                <td className="hidden md:table-cell px-4 py-2">{game.whiteTxnId ? <ClaimedLink link={game.whiteTxnId} /> : game.blackTxnId ? <ClaimedLink link={game.blackTxnId} /> : "not claimed"}</td>
                 <td className="px-4 py-2">
                   <div className="max-w-xs mx-auto cursor-pointer" onClick={() => analyzeGame(game.roomId)}>
                     <Chessboard arePiecesDraggable={false} position={game.fen} />
@@ -77,11 +78,12 @@ const AllGames = () => {
             ))}
           </tbody>
         </table>
+        </div>
 
         {/* Pagination Controls */}
         <div className="flex justify-center items-center space-x-2 mt-4">
     <button
-      className={`px-4 py-2 rounded-lg shadow-md ${currentPage <= 1 ? 'cursor-not-allowed opacity-50 bg-gray-700' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+      className={`px-2 py-1 md:px-4 md:py-2 rounded-lg shadow-md ${currentPage <= 1 ? 'cursor-not-allowed opacity-50 bg-gray-700' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
       disabled={currentPage <= 1}
       onClick={() => setCurrentPage(currentPage - 1)}
     >
@@ -91,19 +93,19 @@ const AllGames = () => {
     {/* Always display the first page button */}
     <PageButton pageNumber={1} setCurrentPage={setCurrentPage} isActive={currentPage === 1} />
     {/* Display "..." if there are pages before the current range */}
-    {currentPage > 3 && <div className="px-4 py-2 text-white">...</div>}
+    {currentPage > 3 && <div className="px-2 py-1 md:px-4 md:py-2 text-white">...</div>}
 
     {/* Calculate the range of pages to display */}
-    {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
+    {Array.from({ length: Math.min(4, totalPages) }, (_, index) => {
       let page = currentPage - 2 + index; // Start from two pages before the current page
-      const maxStartRange = totalPages - 4; // Maximum start range to ensure 5 buttons
+      const maxStartRange = totalPages - 4; // Maximum start range to ensure 4 buttons
 
       if (currentPage < 3) {
         // If currentPage is 1 or 2, start from the first page
         page = 1 + index;
       } else if (currentPage > maxStartRange) {
         // If currentPage is near the end, adjust the start range
-        page = totalPages - 4 + index;
+        page = totalPages - 3 + index;
       }
 
       // Only display if the page number is valid and not the first or last page
@@ -115,14 +117,14 @@ const AllGames = () => {
     })}
 
     {/* Display "..." if there are pages after the current range */}
-    {currentPage < totalPages - 2 && <div className="px-4 py-2 text-white">...</div>}
+    {currentPage < totalPages - 2 && <div className="px-2 py-1 md:px-4 md:py-2 text-white">...</div>}
     {/* Always display the last page button */}
     {totalPages > 1 && (
       <PageButton pageNumber={totalPages} setCurrentPage={setCurrentPage} isActive={currentPage === totalPages} />
     )}
 
     <button
-      className={`px-4 py-2 rounded-lg shadow-md ${currentPage >= totalPages ? 'cursor-not-allowed opacity-50 bg-gray-700' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+      className={`px-2 py-1 md:px-4 md:py-2 rounded-lg shadow-md ${currentPage >= totalPages ? 'cursor-not-allowed opacity-50 bg-gray-700' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
       disabled={currentPage >= totalPages}
       onClick={() => setCurrentPage(currentPage + 1)}
     >
