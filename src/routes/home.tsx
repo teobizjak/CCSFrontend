@@ -227,7 +227,7 @@ function Home() {
 
   return (
     <div className="h-full w-full bg-gray-900">
-  <div className="relative mx-auto min-h-screen max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <div className="relative mx-auto min-h-screen max-w-7xl px-2 py-6 sm:px-4 md:px-6 md:py-8 lg:px-8">
     <header className="mb-12 text-3xl font-bold text-purple-300">
       Welcome, {publicKey ? publicKey.toBase58().slice(0, 8) + "... " : "please connect solana wallet... "}!
     </header>

@@ -4,23 +4,23 @@ import { Chessboard } from 'react-chessboard'
 import ClaimedLink from './claimedLink'
 import Heading from './heading'
 
-function UserGames({games, currentPage, setCurrentPage, totalPages, publicKey, navigateToProfile, handleClaim, analyze, isOwner}) {
-    
+function UserGames({ games, currentPage, setCurrentPage, totalPages, publicKey, navigateToProfile, handleClaim, analyze, isOwner }) {
+
     return (
         <div>
             <Heading>{isOwner === false ? "User" : "Your"} Games</Heading>
-            <div className=" rounded-lg bg-gray-800 p-4 shadow-lg">
-                
+            <div className=" rounded-lg bg-gray-800 py-4 px-0 md:px-4 shadow-lg">
+
                 <table className="w-full table-fixed rounded-lg text-center text-white shadow-lg">
                     <thead>
-                        <tr className="bg-gray-700">
+                        <tr className="bg-gray-700 text-center">
                             <th className="px-4 py-2">Opponent</th>
-                            <th className="px-4 py-2">
+                            <th className="px-4 py-2 hidden md:table-cell">
                                 {isOwner === false ? "User" : "Your"} color
                             </th>
                             <th className="px-4 py-2">Result</th>
                             <th className="px-4 py-2">
-                                Claim reward
+                                Claim <span className='hidden md:inline'>reward</span>
                             </th>
                             <th className="px-4 py-2">Analyze</th>
                         </tr>
@@ -72,8 +72,8 @@ function UserGames({games, currentPage, setCurrentPage, totalPages, publicKey, n
                                 <tr
                                     key={index}
                                     className={`${index % 2 === 0
-                                            ? 'bg-gray-800'
-                                            : 'bg-gray-700'
+                                        ? 'bg-gray-800'
+                                        : 'bg-gray-700'
                                         } hover:bg-gray-600`}
                                 >
                                     <td className="p-4">
@@ -88,12 +88,12 @@ function UserGames({games, currentPage, setCurrentPage, totalPages, publicKey, n
                                             {opponentSliced}...({opponentElo})
                                         </span>
                                     </td>
-                                    <td className="p-4">{color}</td>
+                                    <td className="p-4 hidden md:table-cell">{color}</td>
                                     <td className="p-4">
                                         {result}
                                     </td>
                                     <td className="p-4">
-                                        {result !== 'Defeat' ? isOwner == false ? "awaiting claim" :(
+                                        {result !== 'Defeat' ? isOwner == false ? "awaiting claim" : (
                                             game[colorTxId] ? (
                                                 <ClaimedLink
                                                     link={
@@ -159,8 +159,8 @@ function UserGames({games, currentPage, setCurrentPage, totalPages, publicKey, n
                 <div className="mt-4 flex items-center justify-center space-x-2">
                     <button
                         className={`rounded-lg px-4 py-2 shadow-md ${currentPage <= 1
-                                ? 'cursor-not-allowed bg-gray-700 opacity-50'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                            ? 'cursor-not-allowed bg-gray-700 opacity-50'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-500'
                             }`}
                         disabled={currentPage <= 1}
                         onClick={() =>
@@ -178,7 +178,7 @@ function UserGames({games, currentPage, setCurrentPage, totalPages, publicKey, n
                     />
                     {/* Display "..." if there are pages before the current range */}
                     {currentPage > 3 && (
-                        <div className="px-4 py-2 text-white">
+                        <div className="px-2 md:px-4 py-2 text-white">
                             ...
                         </div>
                     )}
@@ -219,7 +219,7 @@ function UserGames({games, currentPage, setCurrentPage, totalPages, publicKey, n
 
                     {/* Display "..." if there are pages after the current range */}
                     {currentPage < totalPages - 2 && (
-                        <div className="px-4 py-2 text-white">
+                        <div className="px-2 md:px-4 py-2 text-white">
                             ...
                         </div>
                     )}
@@ -234,8 +234,8 @@ function UserGames({games, currentPage, setCurrentPage, totalPages, publicKey, n
 
                     <button
                         className={`rounded-lg px-4 py-2 shadow-md ${currentPage >= totalPages
-                                ? 'cursor-not-allowed bg-gray-700 opacity-50'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                            ? 'cursor-not-allowed bg-gray-700 opacity-50'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-500'
                             }`}
                         disabled={currentPage >= totalPages}
                         onClick={() =>

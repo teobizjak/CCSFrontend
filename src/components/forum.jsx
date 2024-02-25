@@ -44,8 +44,8 @@ const Forum = () => {
     setPosts(prevPosts => [newPost, ...prevPosts]);
   };
   return (
-    <div className='p-4'>
-    <h2 className="text-xl font-semibold mb-4 text-purple-400">Forum</h2>
+    <div className='md:p-4'>
+    <h2 className="text-xl font-semibold mb-4 text-purple-400 text-center md:text-left">Forum</h2>
     <div className="rounded-lg bg-gray-800 p-4 shadow-lg">
       <CreatePost onPostCreated={addPost} onUpdate={handlePostUpdate} />
       {posts.length > 0 && posts.map((post, index) => (

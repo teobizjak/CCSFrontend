@@ -3,6 +3,7 @@ import { Chessboard } from 'react-chessboard';
 import Slider from 'react-slick';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Heading from './heading';
 
 const CurrentlyPlayedGames = () => {
   const [games, setGames] = useState([]);
@@ -32,6 +33,8 @@ const CurrentlyPlayedGames = () => {
         settings: {
           slidesToShow: 1, // Show only one slide on sm screens and below
           slidesToScroll: 1,
+          arrows: false,
+          dots: false,
         },
       },
       
@@ -66,7 +69,7 @@ const CurrentlyPlayedGames = () => {
     <>
       
         <div className='md:p-4 w-full md:w-auto'>
-        <h2 className="text-xl font-semibold mb-4 text-purple-400">Live Games</h2>
+        <Heading className="text-xl font-semibold mb-4 text-purple-400 text-center md:text-left">Live Games</Heading>
       {games.length < 1 ? (
         <p className="text-white">No games are being played currently.</p>
       ) : games.length === 1 ? (

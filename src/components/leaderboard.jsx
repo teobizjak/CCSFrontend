@@ -65,7 +65,7 @@ const Leaderboard = () => {
   return (
     <>
     
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-0 md:p-4">
     <Heading>Leaderboard</Heading>
       <div className="flex w-full space-x-2 mb-4">
         <TabButton label="Elo" tab="tab1" />

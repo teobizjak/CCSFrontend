@@ -24,8 +24,8 @@ const QuestionList = () => {
     setQuestions([...questions, newQuestion]);
   };
   return (
-    <div className='p-4'>
-      <h2 className="text-xl font-semibold mb-4 text-purple-400">FAQ & Help</h2>
+    <div className='md:p-4'>
+      <h2 className="text-xl font-semibold mb-4 text-purple-400 text-center md:text-left">FAQ & Help</h2>
       <div className="rounded-lg bg-gray-800 p-4 shadow-lg space-y-4">
         {questions.map((question, index) => (
           <QuestionItem key={index} question={question} /> // Using index as key; consider using unique IDs

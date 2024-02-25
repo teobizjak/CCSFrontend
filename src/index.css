@@ -40,6 +40,9 @@ iframe#webpack-dev-server-client-overlay {
       transform: translateY(0);
   }
 }
+body{
+  overflow-x: hidden;
+}
 
 .spinner-container {
   display: flex;

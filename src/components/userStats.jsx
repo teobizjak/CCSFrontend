@@ -6,8 +6,8 @@ const UserStats = ({ user, streak, isUserDataNull = false }) => {
         setProfit(user.winnings - user.paid)
     }, [user])
     return (
-        <div className='md:p-4 md:w-auto sm:w-64 sm:px-0'>
-            <h2 className="text-xl font-semibold mb-4 text-purple-400">Your Stats</h2>
+        <div className='md:p-4 md:w-auto sm:w-64 sm:px-0 mb-8 md:mb-auto'>
+            <h2 className="text-xl font-semibold mb-4 text-purple-400 text-center md:text-left">Your Stats</h2>
             <div className="rounded-lg bg-gray-800 p-4 shadow-lg">
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">

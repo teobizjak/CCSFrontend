@@ -33,10 +33,10 @@ const CreateQuestion = ({ onNewQuestion }) => {
       className="mt-1 block w-full px-3 py-2  text-white leading-tight rounded shadow appearance-none focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent sm:text-sm bg-gray-900"
     />
   </div>
-  <button type="submit" className="inline-flex justify-center border border-transparent shadow-sm text-sm rounded-lg bg-purple-800 ease-in-out hover:bg-purple-700 text-white font-bold py-2 px-4 transition duration-300  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50" onClick={handleAddQuestrion}
-               >
-    Add Question
-  </button>
+  <button type="submit" className="block mx-auto md:mx-0 justify-center border border-transparent shadow-sm text-sm rounded-lg bg-purple-800 ease-in-out hover:bg-purple-700 text-white font-bold py-2 px-4 transition duration-300 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50" onClick={handleAddQuestrion}>
+  Add Question
+</button>
+
 </div>
   );
 };

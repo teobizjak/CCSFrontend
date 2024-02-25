@@ -29,7 +29,7 @@ const SearchComponent = () => {
   }, [query]);
 
   return (
-    <div className='container mx-auto p-4'>
+    <div className='container mx-auto md:p-4'>
       <Heading>Search User</Heading>
       <input
         type="text"

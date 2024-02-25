@@ -8,20 +8,20 @@ import SearchComponent from '../components/searchUser';
 const Explore = () => {
     return (
         <div className="h-full w-full bg-gray-900 text-white">
-            <div className="mx-auto min-h-screen max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto min-h-screen max-w-7xl px-2 py-6 sm:px-4 md:px-6 md:py-8 lg:px-8">
                 <header className="mb-8 text-3xl font-bold text-purple-300">
                     Explore Chess Universe
                 </header>
 
-                <div className="grid gap-8 md:grid-cols-4">
+                <div className="grid gap-8 md:grid-cols-9 lg:grid-cols-4">
                     {/* Left Column (smaller) */}
-                    <aside className="md:col-span-1 space-y-8">
+                    <aside className="md:col-span-3 lg:col-span-1 space-y-8 md:space-y-8">
                         <Leaderboard />
                         <SearchComponent />
                     </aside>
 
                     {/* Right Column (larger) */}
-                    <main className="md:col-span-3 space-y-8">
+                    <main className="md:col-span-6 lg:col-span-3 space-y-8 md:space-y-8">
                         <CurrentlyPlayedGames />
                         <FinishedGames />
                         <AllGames />

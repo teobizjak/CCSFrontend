@@ -81,7 +81,7 @@ const AllGames = () => {
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex justify-center items-center space-x-2 mt-4">
+        <div className="flex justify-center items-center space-x-1 md:space-x-2 mt-4">
     <button
       className={`px-2 py-1 md:px-4 md:py-2 rounded-lg shadow-md ${currentPage <= 1 ? 'cursor-not-allowed opacity-50 bg-gray-700' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
       disabled={currentPage <= 1}

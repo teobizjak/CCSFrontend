@@ -3,6 +3,7 @@ import { Chessboard } from 'react-chessboard';
 import Slider from 'react-slick';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Heading from './heading';
 
 const FinishedGames = () => {
   const [games, setGames] = useState([]);
@@ -26,10 +27,12 @@ const FinishedGames = () => {
         },
       },
       {
-        breakpoint: 600,
+        breakpoint: 768,
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          arrows: false,
+          dots: false,
         },
       },
     ],
@@ -60,7 +63,7 @@ const FinishedGames = () => {
   return (
     <>
       <div className='md:p-4 w-full md:w-auto'>
-        <h2 className="text-xl font-semibold mb-4 text-purple-400">Recently Finished Games</h2>
+        <Heading className="text-xl font-semibold mb-4 text-purple-400 text-left md:text-center">Recently Finished Games</Heading>
         {games.length < 1 ? (
           <p className="text-white">No finished games.</p>
         ) : (

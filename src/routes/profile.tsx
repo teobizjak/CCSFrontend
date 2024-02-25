@@ -164,7 +164,7 @@ function Profile() {
     }
     return (
         <div className="h-full w-full bg-gray-900">
-            <div className="relative mx-auto min-h-screen max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="relative mx-auto min-h-screen max-w-7xl px-2 py-8 md:px-6 lg:px-8">
                 {isEditOpen && (
                     <EditProfileModal
                         isEditOpen={isEditOpen}
@@ -175,7 +175,7 @@ function Profile() {
                         publicKey={publicKey}
                     />
                 )}
-                <div className="grid gap-8 text-white md:grid-cols-3">
+                <div className="grid gap-8 text-white grid-cols-1 md:grid-cols-3">
                     <aside className="col-span-1 space-y-8">
                         <ProfileInfo
                             user={user}
@@ -184,7 +184,7 @@ function Profile() {
                         />
                     </aside>
 
-                    <main className="col-span-2 space-y-8">
+                    <main className=" col-span-1 md:col-span-2 space-y-8">
                         {games.length === 0 ? (
                             <>
                                 {' '}

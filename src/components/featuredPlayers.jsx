@@ -33,7 +33,7 @@ const FeaturedPlayers = () => {
 
     return (
         <div className='md:p-4 md:w-auto sm:w-72 sm:px-0'>
-            <h2 className="text-xl font-semibold mb-4 text-purple-400">Featured Players</h2>
+            <h2 className="text-xl font-semibold mb-4 text-purple-400 text-center md:text-left">Featured Players</h2>
             <div className="rounded-lg bg-gray-800 p-4 shadow-lg">
                 <ul>
                     {players.map((player, index) => (
