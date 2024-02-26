@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import PageButton from './pageButton';
 import Heading from './heading';
 import ClaimedLink from './claimedLink';
+import ViewOnlyChessboard from './viewOnlyChessboard';
 
 const AllGames = () => {
   const [games, setGames] = useState([]);
@@ -71,7 +72,7 @@ const AllGames = () => {
                 <td className="hidden md:table-cell px-4 py-2">{game.whiteTxnId ? <ClaimedLink link={game.whiteTxnId} /> : game.blackTxnId ? <ClaimedLink link={game.blackTxnId} /> : "not claimed"}</td>
                 <td className="px-4 py-2">
                   <div className="max-w-xs mx-auto cursor-pointer" onClick={() => analyzeGame(game.roomId)}>
-                    <Chessboard arePiecesDraggable={false} position={game.fen} />
+                    <ViewOnlyChessboard fen={game.fen} />
                   </div>
                 </td>
               </tr>

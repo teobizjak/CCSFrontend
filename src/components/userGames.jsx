@@ -3,6 +3,7 @@ import PageButton from './pageButton'
 import { Chessboard } from 'react-chessboard'
 import ClaimedLink from './claimedLink'
 import Heading from './heading'
+import ViewOnlyChessboard from './viewOnlyChessboard'
 
 function UserGames({ games, currentPage, setCurrentPage, totalPages, publicKey, navigateToProfile, handleClaim, analyze, isOwner }) {
 
@@ -138,12 +139,9 @@ function UserGames({ games, currentPage, setCurrentPage, totalPages, publicKey, 
                                             analyze(game.roomId)
                                         }
                                     >
-                                        <Chessboard
-                                            arePiecesDraggable={
-                                                false
-                                            }
-                                            position={game.fen}
-                                            boardOrientation={
+                                        <ViewOnlyChessboard
+                                            fen={game.fen}
+                                            orientation={
                                                 color === 'White'
                                                     ? 'white'
                                                     : 'black'

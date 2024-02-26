@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaWallet } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const DisplaySearchedUserComponent = ({ user, style }) => {
@@ -8,7 +9,6 @@ const DisplaySearchedUserComponent = ({ user, style }) => {
     navigate(`/profile/${addr}`);
   }
 
-  // Construct user's name or provide a fallback
   const userName = user.firstName || user.lastName
     ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
     : `${user.walletAddress.slice(0, 6)}...`;
@@ -16,19 +16,21 @@ const DisplaySearchedUserComponent = ({ user, style }) => {
   return (
     <div
       style={style}
-      className="cursor-pointer mt-4 bg-slate-800 p-5 rounded-xl shadow-xl transition-all duration-500 ease-in-out hover:shadow-2xl hover:bg-slate-700 animate-fadeIn"
+      className="cursor-pointer mt-2 sm:mt-4 bg-slate-800 p-2 sm:p-4 rounded-lg shadow transition-all duration-500 ease-in-out hover:shadow-2xl hover:bg-slate-700 animate-fadeIn"
       onClick={() => navigateToProfile(user.walletAddress)}
     >
-      <div className="flex flex-col md:flex-row justify-between items-center">
-        <h3 className={`text-lg md:text-xl font-semibold text-white truncate ${!user.firstName && !user.lastName ? 'mb-2 md:mb-0' : ''}`} style={{ maxWidth: '100px' }}>
+      <div className="flex flex-row justify-between items-center">
+        <h3 className="text-sm sm:text-lg font-semibold text-white truncate" style={{ maxWidth: '150px' }}>
           {userName || 'Unknown User'}
         </h3>
-        <span className="bg-purple-600 text-white text-sm md:text-md font-medium px-3 py-1 rounded-full whitespace-nowrap">ELO: {user.elo || 'N/A'}</span>
+        <span className="mt-1 sm:mt-0 bg-purple-500 text-white text-xs sm:text-sm font-medium px-2 py-1 rounded-full whitespace-nowrap">
+          ELO: {user.elo || 'N/A'}
+        </span>
       </div>
 
-      <p className="text-gray-400 mt-2">
-        <i className="fas fa-wallet mr-2"></i> {/* Ensure you have FontAwesome or another icon library integrated */}
-        <span className="font-medium text-indigo-400">Address:</span> {user.walletAddress.slice(0, 12)}...
+      <p className="text-gray-300 mt-2 text-xs sm:text-sm flex items-center">
+        <FaWallet className='mr-1'/>
+        <span className="font-medium text-indigo-300">Address:</span> {user.walletAddress.slice(0, 12)}...
       </p>
     </div>
   );

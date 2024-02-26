@@ -4,6 +4,7 @@ import Slider from 'react-slick';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Heading from './heading';
+import ViewOnlyChessboard from './viewOnlyChessboard';
 
 const CurrentlyPlayedGames = () => {
   const [games, setGames] = useState([]);
@@ -91,7 +92,7 @@ const CurrentlyPlayedGames = () => {
                 </span>
               </div>
               <div onClick={() => watchGame(games[0].roomId)} className="cursor-pointer">
-                <Chessboard arePiecesDraggable={false} position={games[0].fen} />
+              <ViewOnlyChessboard fen={games[0].fen} />
               </div>
           </div>
         </div>
@@ -117,7 +118,7 @@ const CurrentlyPlayedGames = () => {
                 </span>
               </div>
               <div onClick={() => watchGame(game.roomId)} className="cursor-pointer">
-                <Chessboard arePiecesDraggable={false} position={game.fen} />
+              <ViewOnlyChessboard fen={game.fen} />
               </div>
             </div>
           </div>
