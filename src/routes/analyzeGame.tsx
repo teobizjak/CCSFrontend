@@ -28,7 +28,7 @@ export default function AnalyzeGame() {
 
   return (
     <div className="h-full w-full bg-gray-900">
-            <div className="mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto min-h-screen max-w-7xl px-1 sm:px-6 lg:px-8">
         {
           roomId == "" ? "waiting..." : <AnalysisPanel roomId={roomId}/>
 

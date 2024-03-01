@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import socket from './socket'; // Ensure this is correctly set up for your WebSocket connection
 import GameUserData from '../components/gameUserData';
-import { FaExclamationTriangle, FaSync } from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaExclamationTriangle, FaSquare, FaSync } from 'react-icons/fa';
 import GameHistoryBox from '../components/gameHistoryBox';
 
 export default function WatchGame() {
@@ -26,6 +26,7 @@ export default function WatchGame() {
     const [fenHistory, setFenHistory] = useState([]);
     const [orientation, setOrientation] = useState("white");
     const [timers, setTimers] = useState({ timer1: 10 * 60, timer2: 10 * 60 })
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
 
     // Utility function to fetch user data
@@ -38,31 +39,58 @@ export default function WatchGame() {
             console.error('Error fetching user data:', error);
         }
     };
+    const handlePrev = () => {
+
+        if (playbackIndex > 0) {
+            setPlaybackIndex((prevIndex) => prevIndex - 1);
+            setIsPlayback(true);
+        } else {
+            console.log("pb index not > 0", playbackIndex);
+
+        }
+    }
+    const handleNext = () => {
+
+        if (playbackIndex < fenHistory.length - 1) {
+            setPlaybackIndex((prevIndex) => prevIndex + 1);
+            setIsPlayback(true);
+        } if (playbackIndex == fenHistory.length - 1) {
+            // Set isPlayback to false if playbackIndex reaches the end of fenHistory
+            setIsPlayback(false);
+        }
+    }
 
     const loadPgnAndGetFenHistory = (pgn) => {
         console.log("loadpgnandsethistorystart");
-        
+
         const newGame = new Chess();
         newGame.loadPgn(pgn);
-    
+
         const moves = newGame.history({ verbose: true });
         const fens = [];
-    
+
         // Reset the game to start position
         newGame.reset();
-    
+
         // Iterate over the moves and make each move to generate the FEN history
         for (let move of moves) {
-          
-          fens.push(newGame.fen());
-          newGame.move(move);
+
+            fens.push(newGame.fen());
+            newGame.move(move);
         }
         fens.push(chess.fen());
-    
-        setFenHistory(fens);
-      };
 
-      useEffect(() => {
+        setFenHistory(fens);
+        if (isInitialLoad) {
+            setPlaybackIndex(fens.length - 1)
+            console.log("history length", fens.length - 1);
+            setIsInitialLoad(false);
+        }
+
+
+    };
+
+    useEffect(() => {
         let interval
         if (gameState.over === '') {
             interval = setInterval(() => {
@@ -91,12 +119,13 @@ export default function WatchGame() {
         }
     }, [chess, gameState.over, orientation])
 
+
     useEffect(() => {
         console.log("useeff trigger");
         console.log("pb index", playbackIndex);
         console.log("fen on this pb index", fenHistory[playbackIndex]);
-        
-        
+
+
         const handleKeyDown = (event) => {
             switch (event.key) {
                 case 'ArrowLeft':
@@ -123,7 +152,7 @@ export default function WatchGame() {
                     break;
             }
         };
-        
+
         // Join the room as a spectator
         socket.emit('joinRoomAsSpectator', { roomId });
 
@@ -147,7 +176,7 @@ export default function WatchGame() {
                 const remainingBlackTime = Math.max(0, Math.round(duration - blackTime - (turn === 'b' ? timeDifference : 0)));
 
                 // Function to format time in seconds to mm:ss
-                
+
 
                 // Update the timers with the formatted remaining time for each player
                 setTimers({
@@ -195,10 +224,10 @@ export default function WatchGame() {
 
         socket.on('sync', (dt) => {
 
-                setTimers({
-                    timer1: Math.round(dt.blackTimer),
-                    timer2: Math.round(dt.whiteTimer),
-                })
+            setTimers({
+                timer1: Math.round(dt.blackTimer),
+                timer2: Math.round(dt.whiteTimer),
+            })
 
         })
 
@@ -246,9 +275,9 @@ export default function WatchGame() {
 
     return (
         <div className="h-full w-full bg-gray-900">
-            <div className="mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 items-start gap-14 py-8 md:grid-cols-7">
-                    <div className=" h-fit col-span-4 my-auto rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-6 text-white shadow-xl">
+            <div className="mx-auto min-h-screen max-w-7xl px-1 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 items-start gap-0 md:gap-10 py-8 md:grid-cols-7">
+                    <div className=" h-fit col-span-4 my-auto rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 md:px-6 text-white shadow-xl order-2 md:order-1 ">
                         {/* White Player Info */}
 
                         <div>
@@ -266,27 +295,38 @@ export default function WatchGame() {
                             <div className="flex w-full items-center justify-between py-4">
                                 <GameUserData user={whitePlayer} timer={timers.timer2} name={"You"} />
                             </div>
+                            <div className='md:hidden bg-gray-900 grid grid-cols-2 gap-1 py-2 px-1 rounded-b-lg'>
+                                <>
+                                    <button className='w-full  hover:bg-gray-700 text-white rounded-md px-4 py-3 col-span-1 bg-blue-900 flex justify-center' onClick={handlePrev}>
+                                        <FaArrowLeft />
+                                    </button>
+                                    <button className='w-full hover:bg-gray-700 text-white rounded-md px-4 py-3 col-span-1 bg-blue-900 flex justify-center' onClick={handleNext}>
+                                        <FaArrowRight />
+                                    </button>
+
+                                </>
+                            </div>
                         </div>
 
                     </div>
 
-                    <div className='col-span-3'>
-                        <div className="text-6xl font-bold  flex mb-4 items-end text-white">
+                    <div className='col-span-3 order-1 md:order-2'>
+                        <div className="mb-4 flex items-end text-6xl font-bold justify-center md:justify-start text-white">
                             <img
-                                className="aspect-auto w-8 mr-2"
+                                className="mr-2 aspect-auto w-6 md:w-8"
                                 src="/logo192.png"
                                 alt="Logo"
                             />
-                            <span className="text-4xl">CryptoChess</span>
+                            <span className="text-2xl sm:text-3xl md:text-4xl">CryptoChess</span>
                             <span className="text-lg">.site</span>
                         </div>
 
-                        <div className="flex flex-col rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-4 py-2 overflow-hidden text-white">
+                        <div className=" flex-col rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-4 py-2 overflow-hidden text-white hidden md:flex">
 
                             <div className='flex-grow'>
                                 <div className='flex justify-between'>
                                     <div>
-                                        {whitePlayer.walletAddress?.slice(0, 8)}... - {blackPlayer.walletAddress?.slice(0, 8)}...
+                                        <FaSquare className='text-white inline-block mb-1 mr-1'/>{whitePlayer.walletAddress?.slice(0, 8)}... - <FaSquare className='text-black inline-block mb-1 mr-1'/>{blackPlayer.walletAddress?.slice(0, 8)}...
                                     </div>
 
                                     <FaSync className=' text-white hover:text-purple-600 transition-colors duration-1000 cursor-pointer' />

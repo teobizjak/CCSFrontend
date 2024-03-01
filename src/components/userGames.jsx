@@ -154,7 +154,7 @@ function UserGames({ games, currentPage, setCurrentPage, totalPages, publicKey, 
                     </tbody>
                 </table>
                 {/* Pagination Controls */}
-                <div className="mt-4 flex items-center justify-center space-x-2">
+                <div className="mt-4 flex items-center justify-center space-x-1 md:space-x-2">
                     <button
                         className={`rounded-lg px-4 py-2 shadow-md ${currentPage <= 1
                             ? 'cursor-not-allowed bg-gray-700 opacity-50'

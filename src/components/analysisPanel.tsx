@@ -5,7 +5,7 @@ import { Chessboard } from 'react-chessboard';
 import axios from 'axios';
 import GameUserData from './gameUserData';
 import GameHistoryBox from './gameHistoryBox';
-import { FaSquare, FaSync } from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaSquare, FaSync } from 'react-icons/fa';
 
 function AnalysisPanel({ roomId }) {
   axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION;
@@ -253,13 +253,13 @@ function AnalysisPanel({ roomId }) {
   }, [game, fen, index, pgn, engine])
 
   return (
-    <div className="grid grid-cols-1 items-start gap-14 py-8 md:grid-cols-7">
-      <div className=" h-fit col-span-4 my-auto rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-6 text-white">
+    <div className="grid grid-cols-1 items-start gap-0 md:gap-14 py-8 md:grid-cols-7">
+      <div className=" h-fit col-span-4 my-auto rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-0 md:px-6 text-white order-2 md:order-1 shadow-lg">
         {/* White Player Info */}
 
         <div>
           <div className="flex w-full items-center justify-between py-4">
-            <GameUserData user={blackPlayer} timer={455} name={"Opponent"} />
+            <GameUserData user={blackPlayer} timer={600} name={"Opponent"} />
           </div>
           <div className='flex flex-1'>
             <div className="w-6 bg-white flex-grow flex-row">
@@ -275,27 +275,40 @@ function AnalysisPanel({ roomId }) {
             </div>
           </div>
           <div className="flex w-full items-center justify-between py-4">
-            <GameUserData user={whitePlayer} timer={455} name={"You"} />
+            <GameUserData user={whitePlayer} timer={600} name={"You"} />
           </div>
+          <div className='md:hidden bg-gray-900 grid grid-cols-2 gap-1 py-2 px-1 rounded-b-lg'>
+                                <>
+                                    <button className='w-full  hover:bg-gray-700 text-white rounded-md px-4 py-3 col-span-1 bg-blue-900 flex justify-center' onClick={handleLeftArrow}>
+                                        <FaArrowLeft />
+                                    </button>
+                                    <button className='w-full hover:bg-gray-700 text-white rounded-md px-4 py-3 col-span-1 bg-blue-900 flex justify-center' onClick={handleRightArrow}>
+                                        <FaArrowRight />
+                                    </button>
+                                    <div className='w-full hover:bg-gray-700 text-white rounded-md px-4 py-3 col-span-2 flex justify-center'>
+                                        <div className='flex w-full justify-center'>{winner === "draw" ? "Draw" : <><span className=' capitalize mr-1'>{winner} </span>wins</>}</div>
+                                    </div>
+
+                                </>
+                            </div>
         </div>
       </div>
-      <div className='col-span-3'>
-        <div className="text-6xl font-bold  flex mb-4 items-end text-white">
+      <div className='col-span-3 order-1 md:order-2'>
+        <div className="mb-4 flex items-end text-6xl font-bold justify-center md:justify-start text-white ">
           <img
-            className="aspect-auto w-8 mr-2"
+            className="mr-2 aspect-auto w-6 md:w-8"
             src="/logo192.png"
             alt="Logo"
           />
-          <span className="text-4xl">CryptoChess</span>
+          <span className="text-2xl sm:text-3xl md:text-4xl">CryptoChess</span>
           <span className="text-lg">.site</span>
-
         </div>
 
-        <div className="flex flex-col rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-4 py-2 overflow-hidden text-white">
+        <div className="hidden md:flex flex-col rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-700 px-4 py-2 overflow-hidden text-white">
           <div className='flex-grow'>
             <div className='flex justify-between items-center mb-4'>
               <div className='flex items-center'>
-                <FaSquare className=' text-white mr-1'/>{whitePlayer.walletAddress?.slice(0, 8)}... - <FaSquare className=' text-black ml-2 mr-1'/>{blackPlayer.walletAddress?.slice(0, 8)}... 
+                <FaSquare className=' text-white mr-1' />{whitePlayer.walletAddress?.slice(0, 8)}... - <FaSquare className=' text-black ml-2 mr-1' />{blackPlayer.walletAddress?.slice(0, 8)}...
               </div>
               <FaSync className='text-white hover:text-purple-600 transition-colors duration-1000 cursor-pointer' />
             </div>

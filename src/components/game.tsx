@@ -155,7 +155,7 @@ export default function Game({ players, room, orientation, cleanup }) {
     const handleReportCheating = useCallback(() => {
         const cheater = orientation === 'white' ? 'Black' : 'White'
         const data = {
-            message: `${orientation} has resigned.`,
+            message: `${orientation} reported cheating.`,
             room,
             cheater: cheater,
         }
@@ -395,8 +395,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                 case 'ArrowRight':
                     // Increase playbackIndex if it's less than fenHistory.length
                     console.log(
-                        `checking if playbackindex ${
-                            playbackIndex + 1
+                        `checking if playbackindex ${playbackIndex + 1
                         } === fhl ${fenHistory.length - 1}`
                     )
 
@@ -621,9 +620,9 @@ export default function Game({ players, room, orientation, cleanup }) {
                     </div>
                 </div>
             )}
-            <div className="mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 items-start gap-10 py-8 md:grid-cols-3">
-                    <div className=" col-span-2 my-auto h-fit rounded-lg bg-gray-800 px-6 text-white shadow-xl transition-colors duration-700 hover:bg-gray-700">
+            <div className="mx-auto min-h-screen max-w-7xl px-1 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 items-start gap-0 md:gap-10 py-8 md:grid-cols-3">
+                    <div className="order-2 md:order-1 col-span-2 my-auto h-fit rounded-lg bg-gray-800 px-0 md:px-6 text-white shadow-xl transition-colors duration-700 hover:bg-gray-700">
                         <div>
                             <div className="flex w-full items-center justify-between py-4">
                                 <GameUserData
@@ -658,10 +657,10 @@ export default function Game({ players, room, orientation, cleanup }) {
                                                 targetSquare[1] === '8') && orientation === 'white' ||
                                                 (piece === 'bP' &&
                                                     sourceSquare[1] === '2' &&
-                                                    targetSquare[1] === '1' && orientation === 'black' )) &&
+                                                    targetSquare[1] === '1' && orientation === 'black')) &&
                                             Math.abs(
                                                 sourceSquare.charCodeAt(0) -
-                                                    targetSquare.charCodeAt(0)
+                                                targetSquare.charCodeAt(0)
                                             ) <= 1
                                         ) {
                                             console.log('is promotion start')
@@ -721,20 +720,70 @@ export default function Game({ players, room, orientation, cleanup }) {
                                     isPlaying={gameState.over == '' && true}
                                 />
                             </div>
+                            <div className='md:hidden bg-gray-900 grid grid-cols-4 gap-1 py-2 px-1 rounded-b-lg'>
+                                {gameState.over ? (
+                                     <>
+                                     <div className='text-center text-white mb-2 col-span-4'>
+                                       {gameState.over}
+                                     </div>
+                                     <button className='w-full  hover:bg-gray-700 text-white rounded-md px-4 py-3 col-span-2 bg-blue-900' onClick={handleHome}>
+                                       Home
+                                     </button>
+                                     <button className='w-full hover:bg-gray-700 text-white rounded-md px-4 py-3 col-span-2 bg-blue-900' onClick={handleNewGame}>
+                                       New Game
+                                     </button>
+                                     <div className='flex justify-center items-center hover:bg-gray-800 rounded-md px-2 py-3 col-span-2 text-blue-600' onClick={handleReportCheating}>
+                                            <FaExclamationTriangle className='mr-2'/> Report
+                                        </div>
+                                        <div className='flex justify-center items-center hover:bg-gray-800 rounded-md px-2 py-3 col-span-2 text-sm'>
+                                            {userEloChangeWritable}
+                                        </div>
+                                   </>
+                                ) : gameState.drawOffered ? (
+                                    <>
+                                        <div className='flex justify-center items-center hover:bg-gray-800 rounded-md px-2 py-3 text-green-600' onClick={handleAcceptDraw}>
+                                            <FaCheck />
+                                        </div>
+                                        <div className='flex justify-center items-center hover:bg-gray-800 rounded-md px-2 py-3 text-red-600' onClick={handleDeclineDraw}>
+                                            <FaTimes/>
+                                        </div>
+                                        <div className='col-span-2 flex justify-center items-center text-white'>
+                                            Draw Offered
+                                        </div>
+                                        
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className='flex justify-center items-center hover:bg-gray-800 rounded-md px-2 py-3 text-red-600' onClick={handleResign}>
+                                            <FaFlag/>
+                                        </div>
+                                        <div className='flex justify-center items-center hover:bg-gray-800 rounded-md px-2 py-3 text-yellow-600' onClick={handleOfferDraw}>
+                                            <FaHandshake/>
+                                        </div>
+                                        <div className='flex justify-center items-center hover:bg-gray-800 rounded-md px-2 py-3 text-blue-600' onClick={handleReportCheating}>
+                                            <FaExclamationTriangle/>
+                                        </div>
+                                        <div className='flex justify-center items-center hover:bg-gray-800 rounded-md px-2 py-3 text-sm'>
+                                            {userEloChangeWritable}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
                         </div>
                     </div>
-                    <div>
-                        <div className="mb-4 flex items-end text-6xl font-bold">
+                    <div className='order-1 md:order-2 mx-auto md:mx-0 w-full block'>
+                        <div className="mb-4 flex items-end text-6xl font-bold justify-center md:justify-start ">
                             <img
-                                className="mr-2 aspect-auto w-8"
+                                className="mr-2 aspect-auto w-6 md:w-8"
                                 src="/logo192.png"
                                 alt="Logo"
                             />
-                            <span className="text-4xl">CryptoChess</span>
+                            <span className="text-2xl sm:text-3xl md:text-4xl">CryptoChess</span>
                             <span className="text-lg">.site</span>
                         </div>
 
-                        <div className="col-span-1 flex flex-col overflow-hidden rounded-lg bg-gray-800 px-4 py-2 transition-colors duration-700 hover:bg-gray-700">
+                        <div className="col-span-1 hidden md:flex flex-col overflow-hidden rounded-lg bg-gray-800 px-4 py-2 transition-colors duration-700 hover:bg-gray-700">
                             <div className="flex-grow">
                                 <div className="flex justify-between">
                                     <div className="flex items-center">
