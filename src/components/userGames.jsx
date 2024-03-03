@@ -4,8 +4,10 @@ import { Chessboard } from 'react-chessboard'
 import ClaimedLink from './claimedLink'
 import Heading from './heading'
 import ViewOnlyChessboard from './viewOnlyChessboard'
+import HandleClaimButton from './handleClaimButton'
 
 function UserGames({ games, currentPage, setCurrentPage, totalPages, publicKey, navigateToProfile, handleClaim, analyze, isOwner }) {
+    
 
     return (
         <div>
@@ -94,44 +96,7 @@ function UserGames({ games, currentPage, setCurrentPage, totalPages, publicKey, 
                                         {result}
                                     </td>
                                     <td className="p-4">
-                                        {result !== 'Defeat' ? isOwner == false ? "awaiting claim" : (
-                                            game[colorTxId] ? (
-                                                <ClaimedLink
-                                                    link={
-                                                        game[
-                                                        colorTxId
-                                                        ]
-                                                    }
-                                                />
-                                            ) : (
-                                                <button
-                                                    className="rounded-lg bg-purple-800 px-4 py-2 text-white hover:bg-purple-700"
-                                                    onClick={() =>
-                                                        handleClaim(
-                                                            game.roomId
-                                                        )
-                                                    }
-                                                >
-                                                    {result ===
-                                                        'Win'
-                                                        ?
-                                                        game.betAmount *
-                                                        1.95 +
-                                                        ' SOL'
-                                                        : result ===
-                                                            'Draw'
-                                                            ?
-                                                            game.betAmount *
-                                                            0.95 +
-                                                            ' SOL'
-                                                            : ''}
-                                                </button>
-                                            )
-                                        ) : (
-                                            <span className=" cursor-default">
-                                                {isOwner === false ? "User" : "You"} lost
-                                            </span>
-                                        )}
+                                    <HandleClaimButton handleClaim={handleClaim} result={result} isOwner={isOwner} txId={game[colorTxId]} roomId={game.roomId} betAmount={game.betAmount}/>
                                     </td>
                                     <td
                                         className="p-4"

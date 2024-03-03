@@ -32,9 +32,7 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
             lamports: LAMPORTS_PER_SOL * bet,
           })
         );
-        if (true) {
-          joinGame(bet, "empty");
-        }else{
+
 
         
           try {
@@ -59,7 +57,6 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
             // Redirect to /play page
             navigate("/play");
           }
-        }
         
       }
     };

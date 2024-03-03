@@ -42,6 +42,7 @@ iframe#webpack-dev-server-client-overlay {
 }
 body{
   overflow-x: hidden;
+  background-color: rgb(17, 24, 39);
 }
 
 .spinner-container {

@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { useWallet } from '@solana/wallet-adapter-react'
 import backgroundVideo from '../assets/heroBgVideo.mp4'
+import DiscoverSolanaChess from '../components/discoverSection'
+import HowToPlayAndWin from '../components/howToPlaySection'
+import GameFeatures from '../components/gameFeatures'
+import RoadmapToVictory from '../components/roadmapToVictory'
 
 function Root() {
     const [walletProvider, setWalletProvider] = useState('')
@@ -28,6 +32,7 @@ function Root() {
         window.location.reload()
     }
     return (
+        <>
         <div className="relative m-0 flex min-h-screen items-center justify-center overflow-x-hidden p-0 ">
             <video
                 src={backgroundVideo}
@@ -63,7 +68,14 @@ function Root() {
                     </button>
                 </div>
             </div>
+            
         </div>
+        <DiscoverSolanaChess/>
+        <GameFeatures/>
+        <HowToPlayAndWin/>
+        <RoadmapToVictory/>
+        
+        </>
     )
 }
 

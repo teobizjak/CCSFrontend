@@ -14,10 +14,6 @@ function Profile() {
     // Replace this with your wallet name
     axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION
 
-    const walletName = publicKey
-        ? publicKey.toBase58().slice(0, 30) + '...'
-        : 'please connect wallet'
-
     const [streak, setStreak] = useState('')
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [limit, setLimit] = useState(10)
@@ -69,6 +65,13 @@ function Profile() {
 
     useEffect(() => {
         if (publicKey) {
+            let userData = {
+                walletAccount: publicKey.toBase58()
+            }
+            setUser((prevUser) => ({
+                ...prevUser,
+                ...userData,
+            }))
             fetchData()
             fetchUserData()
         }
@@ -87,7 +90,7 @@ function Profile() {
             setGames(response.data.games)
             setTotalPages(response.data.totalPages)
         } catch (error) {
-            console.error('Error:', error)
+            
         }
     }
 
@@ -108,7 +111,6 @@ function Profile() {
                 setGames(response.data)
             })
             .catch((error) => {
-                console.error('Error:', error)
             })
     }, [limit, publicKey])
     useEffect(() => {
@@ -147,20 +149,13 @@ function Profile() {
         navigate(`/profile/${profile}`)
     }
     // Handle the click event of the claim reward button
-    const handleClaim = (roomId) => {
+    const handleClaim = () => {
         // Add your logic here
-        console.log(`Claim ${roomId}`)
-        //for refreshing purposes
-        axios
-            .post(`/claim/${roomId}`)
-            .then((response) => {
-                console.log('response: ', response.data)
-                fetchData()
-                fetchUserData()
-            })
-            .catch((error) => {
-                console.error('Error:', error)
-            })
+        try {
+            fetchUserData();
+        } catch (error) {
+            
+        }
     }
     return (
         <div className="h-full w-full bg-gray-900">

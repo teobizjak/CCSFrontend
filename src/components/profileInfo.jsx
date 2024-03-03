@@ -4,15 +4,14 @@ import Heading from './heading'
 import UserTitleBox from './userTitleBox'
 import { useNavigate } from 'react-router-dom'
 import { BorderColorClass } from '../functions/borderColorClass'
+import { FaBrain, FaMoneyBillWave, FaWallet } from 'react-icons/fa'
 
 
 function ProfileInfo({ user, isOwned, setIsEditOpen }) {
     const navigate = useNavigate();
+    const profit = user.winnings - user.paid;
+    const profitClass = profit >= 0 ? 'text-green-500' : 'text-red-500';
 
-    useEffect(() => {
-        
-        
-    }, [user.elo]); 
     return (
         <div>
 
@@ -34,17 +33,18 @@ function ProfileInfo({ user, isOwned, setIsEditOpen }) {
                                 : 'Unknown'}
                             <UserTitleBox user={user} />
                         </div>
-                        <div className="text-sm opacity-75">
-                            Address:{' '}
+                        <div className="text-sm opacity-75 flex gap-1 items-center">
+                            <FaWallet/> <span className=' hidden md:inline'>Address:</span>{' '}
                             {user.walletAccount?.slice(0, 8)}...
                         </div>
-                        <div className="text-sm opacity-75">
-                            ELO: {user.elo}
+                        <div className="text-sm opacity-75 flex gap-1 items-center">
+                            <FaBrain/><span className=' hidden md:inline'>ELO:</span>{' '} {user.elo}
                         </div>
-                        <div className="mt-1 flex items-center gap-2 text-sm opacity-75">
-                            <i className="fas fa-chart-line text-purple-400"></i>
-                            Profit:{' '}
-                            {(user.winnings - user.paid).toFixed(3)}{' '}
+                        <div className="mt-1 flex items-center gap-1 text-sm opacity-75 ">
+                            <FaMoneyBillWave/>
+                            <span className=' hidden md:inline'>Profit:</span>{' '}
+                            <span className={`${profitClass}`}>{profit.toFixed(3)}{' '}</span>
+                            
                             SOL
                         </div>
                     </div>
@@ -53,26 +53,21 @@ function ProfileInfo({ user, isOwned, setIsEditOpen }) {
                 <div className="mt-8 space-y-4">
                     <div className="grid grid-cols-3 gap-2 text-white">
                         <div className="flex items-center">
-                            <i className="fas fa-trophy text-yellow-400"></i>
                             Wins: {user.won}
                         </div>
                         <div className="flex items-center">
-                            <i className="fas fa-handshake text-blue-400"></i>
                             Draws: {user.drawn}
                         </div>
                         <div className="flex items-center">
-                            <i className="fas fa-skull-crossbones text-red-400"></i>
                             Defeats: {user.lost}
                         </div>
                     </div>
 
                     <div className="flex justify-between text-white">
                         <div className="flex items-center">
-                            <i className="fas fa-wallet text-green-400"></i>
                             Paid: {user.paid.toFixed(3)} SOL
                         </div>
                         <div className="flex items-center">
-                            <i className="fas fa-coins text-orange-400"></i>
                             Earned: {user.winnings.toFixed(3)} SOL
                         </div>
                     </div>
