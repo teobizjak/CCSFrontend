@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { useNavigate } from 'react-router-dom'
 import { FaChessBoard } from 'react-icons/fa' // Import chess icons
+import axios from 'axios'
 
 function Play() {
     const navigate = useNavigate()
@@ -11,8 +12,11 @@ function Play() {
     const buttonColor = 'bg-purple-600 hover:bg-purple-700'
     const buttonRingColor = 'focus:ring focus:ring-purple-300'
     const [orientation, setOrientation] = useState('white')
+    const [isBetValid, setIsBetValid] = useState(false);
+    const [betOptions, setBetOptions] = useState(["waiting for bet options..."])
     const [showDropdown, setShowDropdown] = useState(false)
     const dropdownRef = useRef(null)
+    axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION
     // Replace this with your wallet name
 
     const walletName = publicKey
@@ -37,6 +41,36 @@ function Play() {
             }
         }
     }
+    const fetchBets = async () => {
+        console.log("fetching bets");
+        
+        if (publicKey && connection) {
+            const response = await axios.get(`/betOptions/${publicKey}`)
+            console.log(response.data);
+            
+                const {betOpt, resStatus} = response.data;
+                if (resStatus == "OK") {
+                    console.log("res ok");
+                    
+                    setBetOptions(betOpt);
+                    setIsBetValid(true);
+                    setBet(betOpt[0]);
+                }else if (resStatus == "Banned") {
+                    setIsBetValid(false);
+                    setBetOptions(["you have been banned"]);
+                }else if(resStatus == "Update"){
+                    console.log("App is updating");
+                    setIsBetValid(false);
+                    setBet("Updating app...");
+                    setBetOptions(["Updating app..."]);
+                }else{
+                    console.log("res not ok");
+                    setIsBetValid(false);
+                    setBetOptions(["Error"]);
+                }
+            
+        }
+    }
 
     const handleChessboardClick = () => {
         if (orientation === 'white') {
@@ -48,12 +82,13 @@ function Play() {
 
     useEffect(() => {
         fetchBalance()
+        fetchBets()
     }, [publicKey, connection])
 
     // rest of your code...
 
     // The bet options in SOL
-    const betOptions = [0.01, 0.05, 0.07, 0.1]
+    
 
     // The selected bet amount
     const [bet, setBet] = useState(betOptions[0])
@@ -68,7 +103,10 @@ function Play() {
         // Add your logic here
 
         console.log(`Play with ${bet} SOL`)
-        navigate('/game', { state: { bet: bet } })
+        if (isBetValid === true) {
+            navigate('/game', { state: { bet: bet } })
+        }
+        
     }
     useEffect(() => {
         function handleClickOutside(event) {
@@ -135,7 +173,7 @@ function Play() {
                                         setShowDropdown(!showDropdown)
                                     }
                                 >
-                                    {bet} SOL
+                                    {bet} {isBetValid && "SOL"}
                                     {/* SVG Icon for dropdown */}
                                 </div>
                                 {showDropdown && (
@@ -163,7 +201,7 @@ function Play() {
                                                     setShowDropdown(false)
                                                 }}
                                             >
-                                                {option} SOL
+                                                {option} {isBetValid && "SOL"}
                                             </div>
                                         ))}
                                     </div>
@@ -171,7 +209,7 @@ function Play() {
                             </div>
                         </div>
                         <button
-                            className="group relative overflow-hidden rounded-lg px-10 py-3 text-xl font-bold shadow-lg transition-all duration-300 hover:scale-105 hover:px-28"
+                            className="group relative overflow-hidden rounded-lg px-10 py-3 text-xl font-bold shadow-lg transition-all duration-300 hover:scale-105 hover:px-28" disabled={isBetValid === true ? false : true}
                             onClick={handlePlay}
                         >
                             <div className="absolute inset-0 bg-gradient-to-tr from-purple-700 to-purple-800 transition-opacity duration-1000 group-hover:opacity-0"></div>

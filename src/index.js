@@ -28,10 +28,16 @@ import FakeNavbar from "./components/FakeNavbar";
 import Explore from "./routes/explore";
 import WatchGame from "./routes/watchGame";
 import { AuthProvider } from "./middleware/authContext";
+import LearnMore from "./routes/learnMore";
+import Footer from "./components/footer";
+import PrivacyPolicy from "./components/privacy-policy";
 
 const App = () => {
-  const network = WalletAdapterNetwork.Devnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  //const network = WalletAdapterNetwork.Devnet;
+  const network = 'mainnet';
+  const alchemyMainnetRpcUrl = `https://solana-mainnet.g.alchemy.com/v2/rUZ0WbYipzgAtwT7ViwNtN7VvVHzby5T`;
+  //const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = useMemo(() => alchemyMainnetRpcUrl, []);
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new TorusWalletAdapter(),
@@ -40,22 +46,22 @@ const App = () => {
 
   const router = createBrowserRouter([{
     path: "/",
-    element: <Root />,
+    element: <><Root /><Footer/></>,
     errorElement: <ErrorPage />,
   },
   {
     path: "/home",
-    element: <> <Navbar /> <Home /></>,
+    element: <> <Navbar /> <Home /><Footer/></>,
     errorElement: <ErrorPage />,
   },
   {
     path: "/explore",
-    element: <> <Navbar /> <Explore /></>,
+    element: <> <Navbar /> <Explore /><Footer/></>,
     errorElement: <ErrorPage />,
   },
   {
     path: "/play",
-    element: <> <Navbar /> <Play /></>,
+    element: <> <Navbar /> <Play /><Footer/></>,
     errorElement: <ErrorPage />,
   },
   {
@@ -65,29 +71,39 @@ const App = () => {
   },
   {
     path: "/watch/:roomId",
-    element: <> <Navbar /><WatchGame /></>,
+    element: <> <Navbar /><WatchGame /><Footer/></>,
     errorElement: <ErrorPage />,
   },
   {
     path: "/analyzeGame/:gameId",
-    element: <> <Navbar /><AnalyzeGame /></>,
+    element: <> <Navbar /><AnalyzeGame /><Footer/></>,
     errorElement: <ErrorPage />,
   },
   {
     path: "/profile",
-    element: <> <Navbar /> <Profile /></>,
+    element: <> <Navbar /> <Profile /><Footer/></>,
     errorElement: <ErrorPage />,
   },
   {
     path: "/profile/:publicKey",
-    element: <> <Navbar /> <UserProfile /></>,
+    element: <> <Navbar /> <UserProfile /><Footer/></>,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/learnMore/",
+    element: <> <Navbar /> <LearnMore /><Footer/></>,
     errorElement: <ErrorPage />,
   },
   {
     path: "/rewards",
-    element: <> <Navbar /> <Rewards /></>,
+    element: <> <Navbar /> <Rewards /><Footer/></>,
     errorElement: <ErrorPage />,
-  }]);
+  },
+  {
+    path: "/privacy-policy/",
+    element: <> <Navbar /><PrivacyPolicy /><Footer/></>,
+    errorElement: <ErrorPage />,
+  },]);
 
   return (
 

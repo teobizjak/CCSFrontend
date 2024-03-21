@@ -96,7 +96,7 @@ function UserGames({ games, currentPage, setCurrentPage, totalPages, publicKey, 
                                         {result}
                                     </td>
                                     <td className="p-4">
-                                    <HandleClaimButton handleClaim={handleClaim} result={result} isOwner={isOwner} txId={game[colorTxId]} roomId={game.roomId} betAmount={game.betAmount}/>
+                                    <HandleClaimButton handleClaim={handleClaim} result={result} isOwner={isOwner} txId={game[colorTxId]} roomId={game.roomId} betAmount={game.betAmount} reported={game.reported}/>
                                     </td>
                                     <td
                                         className="p-4"

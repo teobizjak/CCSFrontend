@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import ClaimedLink from './claimedLink';
 import axios from 'axios';
+import { FaEye } from 'react-icons/fa';
 
-function HandleClaimButton({ handleClaim, txId, result, isOwner, roomId, betAmount }) {
+function HandleClaimButton({ handleClaim, txId, result, isOwner, roomId, betAmount, reported }) {
     axios.defaults.baseURL = process.env.REACT_APP_API_CONNECTION;
     const [isClaiming, setIsClaiming] = useState(false);
     const [txIdState, setTxIdState] = useState(txId);
@@ -31,7 +32,9 @@ function HandleClaimButton({ handleClaim, txId, result, isOwner, roomId, betAmou
 
     return (
         <div>
-            {isClaiming ? (
+            {reported === true ? <div className="flex justify-center items-center">
+            <FaEye className="animate-spin rounded-full h-8 w-8 text-purple-300"></FaEye>
+        </div> : isClaiming ? (
         // Spinner/Loader animation when isClaiming is true
         <div className="flex justify-center items-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-800"></div>

@@ -8,6 +8,7 @@ import DiscoverSolanaChess from '../components/discoverSection'
 import HowToPlayAndWin from '../components/howToPlaySection'
 import GameFeatures from '../components/gameFeatures'
 import RoadmapToVictory from '../components/roadmapToVictory'
+import ReadyToMakeYourMove from '../components/readyToMakeYourMove'
 
 function Root() {
     const [walletProvider, setWalletProvider] = useState('')
@@ -74,6 +75,7 @@ function Root() {
         <GameFeatures/>
         <HowToPlayAndWin/>
         <RoadmapToVictory/>
+        <ReadyToMakeYourMove/>
         
         </>
     )
