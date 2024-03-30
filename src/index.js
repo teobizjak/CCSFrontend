@@ -31,6 +31,7 @@ import { AuthProvider } from "./middleware/authContext";
 import LearnMore from "./routes/learnMore";
 import Footer from "./components/footer";
 import PrivacyPolicy from "./components/privacy-policy";
+import Team from "./routes/team";
 
 const App = () => {
   //const network = WalletAdapterNetwork.Devnet;
@@ -97,6 +98,11 @@ const App = () => {
   {
     path: "/rewards",
     element: <> <Navbar /> <Rewards /><Footer/></>,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/team",
+    element:<Team />,
     errorElement: <ErrorPage />,
   },
   {
