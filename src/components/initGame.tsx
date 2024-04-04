@@ -42,7 +42,7 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
             setTxId(hash);
             console.log("txID", txId);
             setInitMessage("Verifying payment...(this step usualy takes up to 10 seconds)");
-            const signatureStatus = await connection.confirmTransaction(hash, 'confirmed');
+            const signatureStatus = await connection.confirmTransaction(hash, 'finalized');
             console.log('Signature status:', signatureStatus);
             if (signatureStatus){
               setInitMessage("Joining game...");

@@ -43,7 +43,7 @@ function Root() {
                 className="absolute top-0 left-0 h-full w-full object-cover opacity-75 m-0 p-0"
             ></video>
             {/* Adding a semi-transparent overlay for better text contrast */}
-            <div className="absolute h-full w-full bg-black bg-opacity-90"></div>
+            <div className="absolute h-full w-full bg-black bg-opacity-60"></div>
             <div className="z-10 max-w-2xl space-y-6 px-4 py-6 text-center text-white">
                 {/* Main heading with increased prominence */}
                 <h1 className="text-4xl font-extrabold text-purple-600 md:text-6xl lg:text-8xl md:mb-10">

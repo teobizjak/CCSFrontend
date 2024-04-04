@@ -21,7 +21,7 @@ function LoginTeam({setToken, token,setActiveTab}) {
           const signature = await signMessage(encodedMessage);
     
           // Step 3: Send the signed message to the server for verification
-          axios.post('/verify-signature', {
+          axios.post('/verify-signature-team', {
             signature: Array.from(signature), // Convert the signature to a normal array for JSON serialization
             publicKey: publicKey.toString(),
             message,

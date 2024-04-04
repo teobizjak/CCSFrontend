@@ -209,6 +209,33 @@ const Navbar = () => {
                                 }}
                             />
                         </div>
+                        <div className=' md:hidden'>
+                        {!publicKey ? (
+                                    <div
+                                        className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-purple-700 p-1"
+                                        onClick={clearStorageWallet}
+                                    >
+                                        {/* Apply text-white to the icon itself to make the exclamation mark white */}
+                                        <FaEraser className="text-white" />
+                                    </div>
+                                ) : isTokenValid ? (
+                                    <div
+                                        className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-purple-700 p-1"
+                                        onClick={generateAndSignToken}
+                                    >
+                                        {/* Apply text-white to the icon itself to make the exclamation mark white */}
+                                        <FaCheck className="text-white" />
+                                    </div>
+                                ) : (
+                                    <div
+                                        className="teyt-sm flex cursor-pointer items-center justify-center rounded-full bg-red-500 p-1"
+                                        onClick={generateAndSignToken}
+                                    >
+                                        {/* Apply text-white to the icon itself to make the exclamation mark white */}
+                                        <FaExclamation className="text-white" />
+                                    </div>
+                                )}
+                        </div>
                         <div className="hidden md:block">
                             <div className="ml-10 flex items-center space-x-4">
                                 <NavLink to="/home">Home</NavLink>
@@ -246,6 +273,7 @@ const Navbar = () => {
                                     </div>
                                 )}
                             </div>
+                            
                         </div>
                         <div className="-mr-2 flex md:hidden">
                             <button
@@ -297,15 +325,22 @@ const Navbar = () => {
                 {isOpen && (
                     <div className="md:hidden">
                         <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-                            <NavLink to="/">Home</NavLink>
+                            <NavLink to="/home">Home</NavLink>
                             <NavLink to="/explore">Explore</NavLink>
-                            <NavLink to="/profile">Profile</NavLink>
-                            <NavLink to="/play">Play</NavLink>
+                            {isTokenValid && (
+                                    <>
+                                        <NavLink to="/profile">Profile</NavLink>
+                                        <NavLink to="/play">Play</NavLink>
+                                    </>
+                                )}
                             <WalletMultiButton />
                         </div>
                     </div>
                 )}
             </nav>
+            <p className='bg-orange-500 text-xs text-center'>
+                                    Update Soon. Matchmaking is unavailible for some time.
+                            </p>
         </>
     )
 }
