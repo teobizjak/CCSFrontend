@@ -338,9 +338,7 @@ const Navbar = () => {
                     </div>
                 )}
             </nav>
-            <p className='bg-orange-500 text-xs text-center'>
-                                    Update Soon. Matchmaking is unavailible for some time.
-                            </p>
+            
         </>
     )
 }

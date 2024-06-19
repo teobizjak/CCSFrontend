@@ -34,11 +34,11 @@ import PrivacyPolicy from "./components/privacy-policy";
 import Team from "./routes/team";
 
 const App = () => {
-  //const network = WalletAdapterNetwork.Devnet;
-  const network = 'mainnet';
+  const network = WalletAdapterNetwork.Devnet;
+  //const network = 'mainnet';
   const alchemyMainnetRpcUrl = `https://solana-mainnet.g.alchemy.com/v2/rUZ0WbYipzgAtwT7ViwNtN7VvVHzby5T`;
-  //const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  const endpoint = useMemo(() => alchemyMainnetRpcUrl, []);
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  //const endpoint = useMemo(() => alchemyMainnetRpcUrl, []);
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new TorusWalletAdapter(),
