@@ -88,9 +88,9 @@ export default function InitGame({ setRoom, setOrientation, setPlayers, bet }) {
   }
   
   return (
-    <div className="spinner-container">
+    <div className="spinner-container h-screen w-screen flex justify-center items-center">
       <div className="spinner"></div>
-      {initMessage && <div className="init-message">{initMessage}</div>}
+      {initMessage && <div className="init-message text-white">{initMessage}</div>}
     </div>
 
   );

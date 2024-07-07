@@ -199,6 +199,7 @@ export default function Game({ players, room, orientation, cleanup }) {
     }, [])
 
     const handleOfferDraw = useCallback(() => {
+        console.log("params: ", promotionFrom, promotionTo, showPromotionDialog);
         socket.emit('offerDraw', {
             roomId: room,
             token: localStorage.getItem(`token-${publicKey.toString()}`),
@@ -651,6 +652,10 @@ export default function Game({ players, room, orientation, cleanup }) {
                                         targetSquare,
                                         piece
                                     ) => {
+                                        console.log("checking for promotion: ", sourceSquare, targetSquare, piece);
+                                        console.log("prev params: ", promotionFrom, promotionTo, showPromotionDialog);
+                                        
+                                        
                                         if (
                                             ((piece === 'wP' &&
                                                 sourceSquare[1] === '7' &&
@@ -666,10 +671,12 @@ export default function Game({ players, room, orientation, cleanup }) {
                                             console.log('is promotion start')
                                             console.log('source:', sourceSquare)
                                             console.log('target:', targetSquare)
+                                            console.log('pd:', showPromotionDialog)
                                             setPromotionFrom(sourceSquare)
                                             setPromotionTo(targetSquare)
                                             setShowPromotionDialog(true)
                                             console.log('is promotion end')
+                                            console.log("new params: ", promotionFrom, promotionTo, showPromotionDialog);
                                         }
                                     }}
                                     onPromotionPieceSelect={(p) => {
@@ -692,6 +699,11 @@ export default function Game({ players, room, orientation, cleanup }) {
                                             console.log(
                                                 `emitting move pk: ${publicKey}, tk: ${token}`
                                             )
+                                            setPromotionFrom(null);
+                                            setPromotionTo(null);
+                                            setShowPromotionDialog(false);
+
+                                            console.log("new params after move: ", promotionFrom, promotionTo, showPromotionDialog);
 
                                             socket.emit('move', {
                                                 token: localStorage.getItem(

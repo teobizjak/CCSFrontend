@@ -201,13 +201,14 @@ const Navbar = () => {
                     <div className="flex h-16 items-center justify-between">
                         <div className="flex items-center">
                             <img
-                                className="w-6 flex-shrink-0 shadow-lg"
+                                className="w-6 flex-shrink-0 shadow-lg mr-3"
                                 src="/logo192.png"
                                 alt="Logo"
                                 onClick={() => {
                                     navigate('/')
                                 }}
                             />
+                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-100 to-blue-100">Cryptochess</span>
                         </div>
                         <div className=' md:hidden'>
                         {!publicKey ? (
