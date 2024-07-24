@@ -22,7 +22,12 @@ function ProfilePhoto({ src, className, bgColor }) {
   const [srcOfImage, setSrcOfImage] = useState(images[src]);
 
   useEffect(() => {
-    setSrcOfImage(images[src]);
+    if(src == ""){
+      setSrcOfImage(images["avatar"]);
+    }else{
+      setSrcOfImage(images[src]);
+    }
+    
   }, [src]);
 
   return (
