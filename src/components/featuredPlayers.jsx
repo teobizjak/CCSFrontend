@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { BorderColorClass } from '../functions/borderColorClass';
 import UserTitleBox from './userTitleBox';
+import PlayerBox from './playerBox'
 
 const FeaturedPlayers = () => {
     // Set the base URL for axios requests
@@ -40,9 +41,7 @@ const FeaturedPlayers = () => {
                         <li key={index} className="flex items-center justify-between py-2 border-b border-gray-700">
                             <div className="flex items-center">
                                 <ProfilePhoto className="h-10 w-10 rounded-full" src={player.picture || "avatar"} bgColor={BorderColorClass(player.elo)} alt={player.name} />
-                                <span className="font-semibold ml-3 text-gray-300 hover:text-purple-400 transition-colors duration-500 cursor-pointer relative" onClick={() =>{navigate(`/profile/${player.walletAddress}`)}}>{player.firstName || player.lastName
-                                    ? `${player.firstName || ''} ${player.lastName || ''}`.trim()
-                                    : player.walletAddress.slice(0, 8) + "..."}<UserTitleBox user={player} /></span>
+                                <PlayerBox className="font-semibold ml-3 hover:text-purple-400 transition-colors duration-500 cursor-pointer relative" onClick={() =>{navigate(`/profile/${player.walletAddress}`)}} player={player} />
                             </div>
                             <span className="text-sm text-gray-300">{player.elo} ELO</span>
                         </li>

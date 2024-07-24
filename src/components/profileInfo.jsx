@@ -5,6 +5,7 @@ import UserTitleBox from './userTitleBox'
 import { useNavigate } from 'react-router-dom'
 import { BorderColorClass } from '../functions/borderColorClass'
 import { FaBrain, FaMoneyBillWave, FaWallet } from 'react-icons/fa'
+import PlayerBox from './playerBox'
 
 
 function ProfileInfo({ user, isOwned, setIsEditOpen }) {
@@ -27,12 +28,8 @@ function ProfileInfo({ user, isOwned, setIsEditOpen }) {
                         />
                     </div>
                     <div className="text-white">
-                        <div className="text-xl font-semibold relative">
-                            {user.firstName || user.lastName
-                                ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-                                : 'Unknown'}
-                            <UserTitleBox user={user} />
-                        </div>
+                        <PlayerBox className="text-xl font-semibold relative" player={user}>
+                        </PlayerBox>
                         <div className="text-sm opacity-75 flex gap-1 items-center">
                             <FaWallet/> <span className=' hidden md:inline'>Address:</span>{' '}
                             {user.walletAccount?.slice(0, 8)}...

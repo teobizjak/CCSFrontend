@@ -156,4 +156,61 @@ body{
   border: 2px solid #1a1a1a; /* Adjusted border color for hover state for contrast */
 }
 
+.text-bronze {
+  background: linear-gradient(45deg, #CD7F32, #D4AF37);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-silver {
+  background: linear-gradient(45deg, #C0C0C0, #E0E0E0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-gold {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-ruby {
+  background: linear-gradient(45deg, #E0115F, #FF69B4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-emerald {
+  background: linear-gradient(45deg, #50C878, #66CDAA);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-diamond {
+  background: linear-gradient(45deg, #B9F2FF, #E0FFFF);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.gradient-text {
+  background: linear-gradient(45deg, #CD7F32, #D4AF37, #C0C0C0, #E0E0E0, #FFD700, #FFA500, #E0115F, #FF69B4, #50C878, #66CDAA, #B9F2FF, #E0FFFF);
+  background-size: 1200% 1200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradientAnimation 15s ease infinite;
+}
+
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 

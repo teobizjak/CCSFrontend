@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Heading from './heading';
+import PlayerBox from './playerBox';
 
 const Leaderboard = () => {
   const [activeTab, setActiveTab] = useState('tab1');
@@ -37,26 +38,30 @@ const Leaderboard = () => {
     navigate(`/profile/${walletAddress}`);
   };
 
-  const renderPlayerIdentity = (item) => {
-    const displayText = item.firstName && item.lastName ? `${item.firstName} ${item.lastName}` : `${item.walletAddress.slice(0,8)}...`;
+  const renderPlayerIdentity = (item, index) => {
+    
     return (
-      <span
+      <span>{index+1}.{" "}<span className=''></span><PlayerBox
         className="hover:text-purple-400 cursor-pointer"
         onClick={() => navigateToProfile(item.walletAddress)}
-      >
-        {displayText}
-      </span>
+        player={item}
+      /></span>
+      
+      
+
     );
   };
 
-  const renderDataBasedOnTab = (item) => {
+  const renderDataBasedOnTab = (item, index) => {
+    var winnings = !isNaN(item.winnings) ? item.winnings : 0;
     switch (activeTab) {
       case 'tab1': // Elo
-        return <>{renderPlayerIdentity(item)} - {item.elo}</>;
+        return <>{renderPlayerIdentity(item, index)} {item.elo}</>;
       case 'tab2': // Wins
-        return <>{renderPlayerIdentity(item)} - {item.won}</>;
+        return <>{renderPlayerIdentity(item, index)} {item.won}</>;
       case 'tab3': // Winnings
-        return <>{renderPlayerIdentity(item)} - {item.winnings} SOL</>;
+      return <>{renderPlayerIdentity(item, index)} <span>{winnings.toFixed(2)} <span className='text-micro'>SOL</span></span></>;
+
       default:
         return '';
     }
@@ -74,10 +79,10 @@ const Leaderboard = () => {
       </div>
 
       <div className="bg-gray-800 shadow rounded-lg p-4 text-white">
-        <ul>
+        <ul className='list-decimal list-inside'>
           {leaderboardData.map((item, index) => (
-            <li key={index} className={`py-2 border-b border-gray-700 ${index === 0 ? 'font-bold' : ''}`}>
-              {index + 1}. {renderDataBasedOnTab(item)}
+            <li key={index} className={`py-2 flex justify-between  border-b border-gray-700 ${index === 0 ? 'font-bold' : ''}`}>
+              {renderDataBasedOnTab(item, index)}
             </li>
           ))}
         </ul>
