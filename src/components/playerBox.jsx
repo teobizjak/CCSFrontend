@@ -18,7 +18,7 @@ function PlayerBox({ player, className, onClick, onlyHover = false }) {
 
   return (
     <span
-      className={`${className} ${tierClass} relative group font-bold`}
+      className={`${className} ${tierClass} relative group ${player.tier ? 'font-bold' : ''}`}
       onClick={onClick}
     >
       {player.firstName || player.lastName
