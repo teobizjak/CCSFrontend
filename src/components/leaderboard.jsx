@@ -42,7 +42,7 @@ const Leaderboard = () => {
     
     return (
       <span>{index+1}.{" "}<span className=''></span><PlayerBox
-        className="hover:text-purple-400 cursor-pointer"
+        className=" cursor-pointer"
         onClick={() => navigateToProfile(item.walletAddress)}
         player={item}
       /></span>

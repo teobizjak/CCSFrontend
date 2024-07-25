@@ -156,8 +156,21 @@ body{
   border: 2px solid #1a1a1a; /* Adjusted border color for hover state for contrast */
 }
 
+/* Base text styles for each tier */
+/* Base text styles for each tier */
+/* Base text styles for each tier */
+/* Base text styles for each tier */
+/* Base text styles for each tier */
+/* Base text styles for each tier */
 .text-bronze {
   background: linear-gradient(45deg, #CD7F32, #D4AF37);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-bronze:hover {
+  background: linear-gradient(45deg, #CD7F32, #A67B5B);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -170,6 +183,14 @@ body{
   color: transparent;
 }
 
+.text-silver:hover {
+  background: linear-gradient(45deg, #C0C0C0, #A9A9A9);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
 .text-gold {
   background: linear-gradient(45deg, #FFD700, #FFA500);
   background-clip: text;
@@ -177,27 +198,67 @@ body{
   color: transparent;
 }
 
-.text-ruby {
-  background: linear-gradient(45deg, #E0115F, #FF69B4);
+.text-gold:hover {
+  background: linear-gradient(45deg, #FFD700, #FF8C00);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradientShift 2s ease infinite;
+}
+
+/* Base text styles for Emerald, Ruby, and Diamond */
+.text-emerald {
+  background: linear-gradient(45deg, #50C878, #66CDAA);
+  background-size: 200% 200%;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
 }
 
-.text-emerald {
-  background: linear-gradient(45deg, #50C878, #66CDAA);
+.text-emerald:hover {
+  background: linear-gradient(45deg, #2E8B57, #4CAF50, #2E8B57, #76C7C0, #2E8B57, #98FB98, #2E8B57);
+  background-size: 400% 400%; /* Larger background size for more dramatic effect */
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+  animation: emeraldGradientChange 2s ease infinite;
+}
+
+.text-ruby {
+  background: linear-gradient(45deg, #E0115F, #FF69B4);
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-ruby:hover {
+  background: linear-gradient(45deg, #C8102E, #FF1493, #C8102E, #FF6F61, #C8102E, #FF9AA2, #C8102E);
+  background-size: 400% 400%; /* Larger background size for more dramatic effect */
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: rubyGradientChange 2s ease infinite;
 }
 
 .text-diamond {
   background: linear-gradient(45deg, #B9F2FF, #E0FFFF);
+  background-size: 200% 200%;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
 }
 
+.text-diamond:hover {
+  background: linear-gradient(45deg, #87CEFA, #B0E0E6, #87CEFA, #E0FFFF, #87CEFA, #D6F7FF, #87CEFA);
+  background-size: 400% 400%; /* Larger background size for more dramatic effect */
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: diamondGradientChange 2s ease infinite;
+}
+
+/* Coolest gradient text with advanced animation */
 .gradient-text {
   background: linear-gradient(45deg, #CD7F32, #D4AF37, #C0C0C0, #E0E0E0, #FFD700, #FFA500, #E0115F, #FF69B4, #50C878, #66CDAA, #B9F2FF, #E0FFFF);
   background-size: 1200% 1200%;
@@ -207,10 +268,64 @@ body{
   animation: gradientAnimation 15s ease infinite;
 }
 
+.gradient-text:hover {
+  background: linear-gradient(45deg, #FF69B4, #E0FFFF, #FFD700, #50C878, #D4AF37, #C0C0C0);
+  background-size: 1200% 1200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradientAnimationHover 5s ease infinite, pulse 1s ease infinite;
+}
+
+/* Keyframes for animations */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+@keyframes emeraldGradientChange {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+@keyframes rubyGradientChange {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+@keyframes diamondGradientChange {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
 @keyframes gradientAnimation {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
+@keyframes gradientAnimationHover {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
+@keyframes pulse {
+  0% {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+  }
+  100% {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+  }
+}
