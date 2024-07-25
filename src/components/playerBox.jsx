@@ -8,8 +8,8 @@ function PlayerBox({ player, className, onClick, onlyHover = false }) {
     2: 'text-silver',      // Bright Silver
     3: 'text-gold',          // Bright Gold
     4: 'text-emerald',    // Emerald
-    5: 'text-ruby',          // Vibrant Ruby
-    6: 'text-diamond',    // Diamond Text
+    5: 'text-diamond',          // Vibrant Ruby
+    6: 'text-ruby',    // Diamond Text
     7: 'gradient-text'   // Gradient Text
   };
 
@@ -18,8 +18,8 @@ function PlayerBox({ player, className, onClick, onlyHover = false }) {
     2: 'text-silver-hover',   
     3: 'text-gold-hover',     
     4: 'text-emerald-hover',  
-    5: 'text-ruby-hover',     
-    6: 'text-diamond-hover',  
+    5: 'text-diamond-hover',     
+    6: 'text-ruby-hover',  
     7: 'gradient-text-hover'  
   };
 
