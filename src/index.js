@@ -32,13 +32,18 @@ import LearnMore from "./routes/learnMore";
 import Footer from "./components/footer";
 import PrivacyPolicy from "./components/privacy-policy";
 import Team from "./routes/team";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
-  const network = WalletAdapterNetwork.Devnet;
+  const network = WalletAdapterNetwork.Mainnet;
   //const network = 'mainnet';
-  const alchemyMainnetRpcUrl = `https://solana-mainnet.g.alchemy.com/v2/rUZ0WbYipzgAtwT7ViwNtN7VvVHzby5T`;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  //const endpoint = useMemo(() => alchemyMainnetRpcUrl, []);
+  //const alchemyMainnetRpcUrl = `https://solana-mainnet.g.alchemy.com/v2/rUZ0WbYipzgAtwT7ViwNtN7VvVHzby5T`;
+  const mainnetRpcUrl = `https://mainnet.helius-rpc.com/?api-key=dace1298-e730-46a5-adfa-797741a1383c`;
+  //const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = useMemo(() => mainnetRpcUrl, []);
+
+  
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new TorusWalletAdapter(),
@@ -118,6 +123,7 @@ const App = () => {
         <WalletModalProvider>
           <AuthProvider>
             <RouterProvider router={router} />
+            <ToastContainer/>
           </AuthProvider>
         </WalletModalProvider>
       </WalletProvider>

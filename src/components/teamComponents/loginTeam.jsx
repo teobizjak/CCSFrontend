@@ -30,7 +30,7 @@ function LoginTeam({setToken, token,setActiveTab}) {
             if (response.data.valid) {
                 console.log("token is: ", btoa(String.fromCharCode(...signature)));
                 setToken(btoa(String.fromCharCode(...signature)))
-                setActiveTab("teamHome")
+                setActiveTab("dashboard")
               console.log('Signature is valid and saved in local storage.');
             } else {
               console.error('Signature is invalid according to the server.');

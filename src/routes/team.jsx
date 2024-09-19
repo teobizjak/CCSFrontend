@@ -13,6 +13,12 @@ import DbQuestions from '../components/teamComponents/dbQuestions';
 import ReviewGames from '../components/teamComponents/reviewGames';
 import EditUser from '../components/teamComponents/editUser';
 import EditGame from '../components/teamComponents/editGame';
+import TeamLayout from '../components/teamComponents/teamLayout';
+import TeamDashboard from '../components/teamComponents/teamDashboard';
+import TeamUsers from '../components/teamComponents/teamUsers';
+import TeamGames from '../components/teamComponents/teamGames';
+import TeamContent from '../components/teamComponents/teamContent';
+import TeamFinances from '../components/teamComponents/teamFinances';
 
 function Team() {
     const [activeTab, setActiveTab] = useState("login");
@@ -21,22 +27,16 @@ function Team() {
     // Render the appropriate tab based on the activeTab state
     const renderTab = () => {
         switch (activeTab) {
-            case "teamHome":
-                return <TeamHome setActiveTab={setActiveTab} />;
-            case "dbUsers":
-                return <DbUsers setActiveTab={setActiveTab} token={token}/>;
-            case "dbGames":
-                return <DbGames setActiveTab={setActiveTab} token={token}/>;
-            case "dbForum":
-                return <DbForum setActiveTab={setActiveTab} token={token}/>;
-            case "dbQuestions":
-                return <DbQuestions setActiveTab={setActiveTab} token={token}/>;
-            case "reviewGames":
-                return <ReviewGames setActiveTab={setActiveTab} token={token}/>;
-            case "editUser":
-                return <EditUser setActiveTab={setActiveTab} token={token}/>;
-            case "editGame":
-                return <EditGame setActiveTab={setActiveTab} token={token}/>;
+            case "dashboard":
+                return <TeamLayout Component={TeamDashboard} activeTab={activeTab} setActiveTab={setActiveTab} token={token}/>;
+                case "users":
+                return <TeamLayout Component={TeamUsers} activeTab={activeTab} setActiveTab={setActiveTab} token={token}/>;
+                case "games":
+                return <TeamLayout Component={TeamGames} activeTab={activeTab} setActiveTab={setActiveTab} token={token}/>;
+                case "content":
+                return <TeamLayout Component={TeamContent} activeTab={activeTab} setActiveTab={setActiveTab} token={token}/>;
+                case "finances":
+                return <TeamLayout Component={TeamFinances} activeTab={activeTab} setActiveTab={setActiveTab} token={token}/>;
             default:
                 return <div>Tab not found</div>;
         }

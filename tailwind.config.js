@@ -10,9 +10,15 @@ module.exports = {
           '0%, 100%': { opacity: 1, transform: 'scale(1)' },
           '50%': { opacity: 0.9, transform: 'scale(1.05)' },
         },
+        'pulse-custom': {
+          '0%, 100%': { transform: 'scale(0.95)', opacity: 1 },
+          '50%': { transform: 'scale(1.5)', opacity: 0.5 },
+        },
+
       },
       animation: {
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-custom': 'pulse-custom 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       colors: {
         darkPrimary: '#1E1E2F', // Your custom dark primary color

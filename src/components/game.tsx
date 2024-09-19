@@ -646,7 +646,7 @@ export default function Game({ players, room, orientation, cleanup }) {
                                     onSquareClick={onSquareClick}
                                     customSquareStyles={customSquareStyles}
                                     customArrowColor="#6B21A8"
-                                    showPromotionDialog={showPromotionDialog}
+                                    showPromotionDialog={true}
                                     onPromotionCheck={(
                                         sourceSquare,
                                         targetSquare,
